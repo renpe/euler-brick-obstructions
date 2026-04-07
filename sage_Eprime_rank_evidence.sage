@@ -57,7 +57,12 @@ print("SPECIALISATIONS AND RANK")
 print("=" * 80)
 print()
 
-# Construct the minimal model for various values of s
+# Construct the minimal model for various values of s.
+# We use rank_bound() instead of rank() to avoid "Unable to compute
+# the rank with certainty" warnings from mwrank when Sha[2] may be
+# nontrivial.  rank_bound() returns an unconditional upper bound;
+# an upper bound of 0 certifies rank = 0 without any conjecture.
+# For the authoritative rank-0 certification, see pari_check_rank0.gp.
 results = []
 for a_val in range(1, 20):
     for b_val in range(a_val+1, 20):
@@ -72,34 +77,34 @@ for a_val in range(1, 20):
         try:
             E = EllipticCurve([0, coeff_val, 0, -1, -coeff_val])
             E_min = E.minimal_model()
-            rank = E_min.rank()
+            ub = E_min.rank_bound()
             tors = E_min.torsion_subgroup().invariants()
             cond = E_min.conductor()
-            results.append((s_val, rank, tors, cond, E_min))
-        except:
+            results.append((s_val, ub, tors, cond, E_min))
+        except Exception as ex:
             results.append((s_val, -1, None, None, None))
 
-# Sort by rank
+# Sort by rank bound
 results.sort(key=lambda x: x[1])
 
-rank0_count = sum(1 for r in results if r[1] == 0)
-rank1_count = sum(1 for r in results if r[1] == 1)
-rank2_count = sum(1 for r in results if r[1] == 2)
-uncertain = sum(1 for r in results if r[1] < 0)
+cert0 = sum(1 for r in results if r[1] == 0)
+bound1 = sum(1 for r in results if r[1] == 1)
+bound2 = sum(1 for r in results if r[1] >= 2)
+failed = sum(1 for r in results if r[1] < 0)
 total = len(results)
 
 print("Tested: %d specialisations (a/b with a<b<=19, gcd=1)" % total)
-print("  Rank 0: %d (%.1f%%)" % (rank0_count, 100*rank0_count/total))
-print("  Rank 1: %d (%.1f%%)" % (rank1_count, 100*rank1_count/total))
-print("  Rank 2: %d (%.1f%%)" % (rank2_count, 100*rank2_count/total))
-print("  Uncertain: %d" % uncertain)
+print("  Certified rank 0 (upper bound = 0): %d (%.1f%%)" % (cert0, 100*cert0/total))
+print("  Upper bound 1: %d (%.1f%%)" % (bound1, 100*bound1/total))
+print("  Upper bound >= 2: %d (%.1f%%)" % (bound2, 100*bound2/total))
+print("  Failed: %d" % failed)
 print()
 
-# Show those with rank > 0
-print("Cases with rank > 0:")
-for s_val, rank, tors, cond, E_min in results:
-    if rank > 0:
-        print("  s=%s: rank=%d, torsion=%s, conductor=%s" % (s_val, rank, tors, cond))
+# Show those with rank bound > 0
+print("Cases with rank bound > 0:")
+for s_val, ub, tors, cond, E_min in results:
+    if ub > 0:
+        print("  s=%s: rank_bound=%d, torsion=%s, conductor=%s" % (s_val, ub, tors, cond))
 
 print()
 

@@ -109,66 +109,62 @@ def main():
     bound = int(sys.argv[1]) if len(sys.argv) > 1 else 80
     workers = int(sys.argv[2]) if len(sys.argv) > 2 else 8
 
-    print(f"Suche f1*f2 = Quadrat: b>a>0, n>m>0, gcd=1, bound={bound}")
+    print(f"Searching f1*f2 = perfect square: b>a>0, n>m>0, gcd=1, bound={bound}")
     print()
 
     # Build one task per value of a; each task searches all (b, m, n)
     args_list = [(a, bound) for a in range(1, bound)]
 
-    alle = []  # "alle" = all collected hits
+    all_hits = []
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for i, result in enumerate(executor.map(suche_a, args_list)):
-            alle.extend(result)
+            all_hits.extend(result)
             # Progress report every 20 values of a
             if (i + 1) % 20 == 0:
-                print(f"  a={i+1}/{bound-1}, {len(alle)} Produkt-Treffer bisher")
+                print(f"  a={i+1}/{bound-1}, {len(all_hits)} product hits so far")
 
-    alle.sort()
+    all_hits.sort()
 
     # --- Tally up the results ---
-    n_prod = len(alle)                                        # f1*f2 is a perfect square
-    n_f1 = sum(1 for t in alle if t[7])                       # f1 alone is a perfect square
-    n_f2 = sum(1 for t in alle if t[8])                       # f2 alone is a perfect square
-    n_beide = sum(1 for t in alle if t[7] and t[8])           # both f1 and f2 are perfect squares
-    n_keins = sum(1 for t in alle if not t[7] and not t[8])   # neither f1 nor f2 is a perfect square
+    n_prod = len(all_hits)
+    n_f1 = sum(1 for t in all_hits if t[7])
+    n_f2 = sum(1 for t in all_hits if t[8])
+    n_both = sum(1 for t in all_hits if t[7] and t[8])
+    n_neither = sum(1 for t in all_hits if not t[7] and not t[8])
 
     # --- Print summary ---
     print(f"\n{'='*70}")
-    print(f"ERGEBNIS (bound={bound})")                        # "ERGEBNIS" = RESULT
+    print(f"RESULT (bound={bound})")
     print(f"{'='*70}")
-    print(f"f1*f2 = Quadrat:              {n_prod}")          # "Quadrat" = perfect square
-    print(f"  davon f1=Quadrat:           {n_f1}")            # "davon" = of which
-    print(f"  davon f2=Quadrat:           {n_f2}")
-    print(f"  davon BEIDE=Quadrat:        {n_beide}")         # "BEIDE" = BOTH
-    print(f"  davon KEINS einzeln:        {n_keins}")         # "KEINS einzeln" = NEITHER individually
+    print(f"f1*f2 = perfect square:       {n_prod}")
+    print(f"  of which f1 = square:       {n_f1}")
+    print(f"  of which f2 = square:       {n_f2}")
+    print(f"  of which BOTH = square:     {n_both}")
+    print(f"  of which NEITHER = square:  {n_neither}")
     print()
 
     if n_prod == 0:
-        # No hits found -- the product is never a perfect square
-        print("*** f1*f2 ist NIE ein Quadrat! ***")           # "NIE" = NEVER
-        print("Das wuerde genuegen um die Nichtexistenz zu beweisen.")
-        # "That would suffice to prove non-existence."
+        print("*** f1*f2 is NEVER a perfect square! ***")
+        print("This is consistent with non-existence of perfect Euler bricks.")
     else:
-        # Hits found -- print details
-        print(f"f1*f2 ist {n_prod} mal ein Quadrat.")         # "mal" = times
+        print(f"f1*f2 is a perfect square in {n_prod} cases.")
         print()
 
         # Table header for detailed output
         print(f"{'a':>3} {'b':>3} {'m':>3} {'n':>3} | {'A':>10} {'B':>10} {'C':>10} | "
               f"{'f1=□':>5} {'f2=□':>5} | sqrt(f1*f2)")
         print("-" * 80)
-        for a, b, m, n, A, B, C, sq1, sq2, prod in alle[:50]:
+        for a, b, m, n, A, B, C, sq1, sq2, prod in all_hits[:50]:
             r = isqrt(prod)
-            f1_str = "ja" if sq1 else "nein"    # "ja"/"nein" = "yes"/"no"
-            f2_str = "ja" if sq2 else "nein"
+            f1_str = "yes" if sq1 else "no"
+            f2_str = "yes" if sq2 else "no"
             print(f"{a:>3} {b:>3} {m:>3} {n:>3} | {A:>10} {B:>10} {C:>10} | "
                   f"{f1_str:>5} {f2_str:>5} | {r}")
 
         # Extra section: cases where f1*f2 is square but neither f1 nor f2 is
-        if n_keins > 0:
-            print(f"\n--- Treffer wo f1*f2=□ aber KEINS einzeln: ---")
-            # "Hits where f1*f2 is a perfect square but neither factor alone is"
-            for a, b, m, n, A, B, C, sq1, sq2, prod in alle:
+        if n_neither > 0:
+            print(f"\n--- Hits where f1*f2 = square but NEITHER factor alone: ---")
+            for a, b, m, n, A, B, C, sq1, sq2, prod in all_hits:
                 if not sq1 and not sq2:
                     r = isqrt(prod)
                     print(f"  ({a},{b},{m},{n}): A={A}, B={B}, C={C}, "
