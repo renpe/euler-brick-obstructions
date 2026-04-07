@@ -59,10 +59,10 @@ for a_val in range(1, 40):
         inj, blocker, val = check_injective(s0)
 
         if inj:
-            # Compute rank
+            # Compute rank bound (avoids Sha[2] warnings from mwrank)
             E = EllipticCurve([0, A0, 0, -4, -4*A0]).minimal_model()
             try:
-                rank = E.rank()
+                rank = E.rank_bound()
                 if rank == 0:
                     print("*** FOUND: s=%s, A=%s, rank=0, INJECTIVE! ***" %
                           (s0, A0))
@@ -153,13 +153,13 @@ for a_val in range(1, 20):
         A0 = 2 - 4*((s0^4-6*s0^2+1)/(1+s0^2)^2)^2
         E = EllipticCurve([0, A0, 0, -4, -4*A0]).minimal_model()
         try:
-            r = E.rank()
+            r = E.rank_bound()
             if r == 0:
                 count_0 += 1
         except:
             pass
 
-print("  %d specialisations with rank 0 (s=a/b, a<b<=19)" % count_0)
+print("  %d specialisations with certified rank 0 (s=a/b, a<b<=19)" % count_0)
 print()
 if count_0 > 0:
     print("=> %d > 0, so the generic rank of E_A over Q(s) is 0." % count_0)
