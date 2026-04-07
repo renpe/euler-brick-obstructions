@@ -37,8 +37,8 @@
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 {
-ea_cert = 0; ea_total = 0; ea_rk1 = 0; ea_unsicher = 0;
-ep_cert = 0; ep_total = 0; ep_rk1 = 0; ep_unsicher = 0;
+ea_cert = 0; ea_total = 0; ea_rk1 = 0; ea_uncertain = 0;
+ep_cert = 0; ep_total = 0; ep_rk1 = 0; ep_uncertain = 0;
 
 print("=== E_A: y^2 = x^3 + A*x^2 - 4*x - 4*A ===");
 print("");
@@ -65,9 +65,9 @@ for(a_val = 1, 19,
         if(lb > 0,
           ea_rk1++;
         ,
-          ea_unsicher++;
-          if(ea_unsicher <= 5,
-            print("  UNSICHER: s=", a_val, "/", b_val, "  rank=[", lb, ",", ub, "]")
+          ea_uncertain++;
+          if(ea_uncertain <= 5,
+            print("  UNCERTAIN: s=", a_val, "/", b_val, "  rank=[", lb, ",", ub, "]")
           )
         )
       )
@@ -76,7 +76,7 @@ for(a_val = 1, 19,
 );
 
 print("");
-print("E_A: Getestet=", ea_total, "  Zertifiziert_r0=", ea_cert, "  Rang>0=", ea_rk1, "  Unsicher=", ea_unsicher);
+print("E_A: tested=", ea_total, "  certified_r0=", ea_cert, "  rank>0=", ea_rk1, "  uncertain=", ea_uncertain);
 
 print("");
 print("=== E'_A ===");
@@ -105,9 +105,9 @@ for(a_val = 1, 19,
           if(lb > 0,
             ep_rk1++;
           ,
-            ep_unsicher++;
-            if(ep_unsicher <= 5,
-              print("  UNSICHER: s=", a_val, "/", b_val, "  rank=[", lb, ",", ub, "]")
+            ep_uncertain++;
+            if(ep_uncertain <= 5,
+              print("  UNCERTAIN: s=", a_val, "/", b_val, "  rank=[", lb, ",", ub, "]")
             )
           )
         )
@@ -117,11 +117,11 @@ for(a_val = 1, 19,
 );
 
 print("");
-print("E'_A: Getestet=", ep_total, "  Zertifiziert_r0=", ep_cert, "  Rang>0=", ep_rk1, "  Unsicher=", ep_unsicher);
+print("E'_A: tested=", ep_total, "  certified_r0=", ep_cert, "  rank>0=", ep_rk1, "  uncertain=", ep_uncertain);
 
 print("");
-print("=== FAZIT ===");
-if(ea_cert > 0, print("E_A:  OK (", ea_cert, " zertifiziert)"), print("E_A:  PROBLEM!"));
-if(ep_cert > 0, print("E'_A: OK (", ep_cert, " zertifiziert)"), print("E'_A: PROBLEM!"));
+print("=== SUMMARY ===");
+if(ea_cert > 0, print("E_A:  OK (", ea_cert, " certified rank 0)"), print("E_A:  PROBLEM!"));
+if(ep_cert > 0, print("E'_A: OK (", ep_cert, " certified rank 0)"), print("E'_A: PROBLEM!"));
 }
 quit;
