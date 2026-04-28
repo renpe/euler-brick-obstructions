@@ -1,15 +1,16 @@
 # Computational scripts for the perfect cuboid problem
 
-Scripts supporting two papers by R. Peschmann on the perfect Euler brick
-problem. Each subdirectory is self-contained and corresponds to one
-paper.
+Scripts supporting three papers by R. Peschmann on the perfect Euler
+brick problem. Each subdirectory is self-contained and corresponds to
+one paper.
 
 ## Structure
 
 | Subdirectory | Paper |
 |--------------|-------|
 | [`paper1/`](paper1/) | *Quartic reductions and elliptic obstructions for perfect Euler bricks*, arXiv:2604.09328 (2026) |
-| [`paper2/`](paper2/) | *Computational evidence and structural obstructions for the perfect cuboid problem* (2026) |
+| [`paper4/`](paper4/) | *An odd-exponent blocker theorem and a Mordell-Weil construction of body cuboids* (in preparation) |
+| [`paper5/`](paper5/) | *A torsion-intersection refinement: rigorous proof of the perfect-cuboid conjecture on an explicit family of master-tuple fibers* (in preparation) |
 
 Each subdirectory contains its own `README.md` describing the scripts
 and their paper references.

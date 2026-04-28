@@ -1,0 +1,8 @@
+sympy~=1.14.0
+numpy~=2.4.4
+psycopg
+psycopg[binary]
+matplotlib
+python-dotenv
+pyarrow
+pandas

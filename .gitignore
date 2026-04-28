@@ -1,0 +1,38 @@
+# Sage preparser output
+*.sage.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.venv-linux/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+
+# Logs
+*.log
+/tmp/
+
+# Compute-Run-Artefakte im Repo-Root (regenerierbar, nicht zu deployen)
+*_progress.txt
+*_progress.json
+chabauty_progress.json
+chabauty_pq_progress.json
+chabauty_swap_progress.json
+master_scan_new_progress.json
+random_scan_progress.json
+
+# Generated data outputs (regenerable)
+*.tmp
+
+# Local environment overrides
+.env
+.env.local
