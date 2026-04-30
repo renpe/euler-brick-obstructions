@@ -10,7 +10,7 @@ Usage:
     python jh_mwrank_pass_dispatch.py [M_MAX] [NWORKERS]
 
 Environment:
-    SAGE_BIN  — path to sage (default: /home/varon/miniforge3/envs/sage/bin/sage)
+    SAGE_BIN  — path to the sage binary (default: 'sage' on PATH)
 """
 import os
 import sys
@@ -19,8 +19,7 @@ import csv
 import subprocess
 from time import time
 
-SAGE_BIN = os.environ.get(
-    'SAGE_BIN', '/home/varon/miniforge3/envs/sage/bin/sage')
+SAGE_BIN = os.environ.get('SAGE_BIN', 'sage')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORKER = os.path.join(HERE, 'jh_mwrank_pass_worker.py')

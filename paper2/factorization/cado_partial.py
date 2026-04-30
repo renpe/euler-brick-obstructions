@@ -13,7 +13,7 @@ factors of the input integer. We collect them, multiply, verify
 against the residual, and store.
 
 Usage:
-    /home/varon/opt/cado-nfs/cado-nfs.venv/bin/python cado_partial.py [HIT_ID]
+    "$CADO_VENV_PY" cado_partial.py [HIT_ID]
 
 If HIT_ID is omitted, we pick the SMALLEST residual that still has
 >= MIN_RESIDUAL_DIGITS (=84) digits. Below 84 digits YAFU/QS is
