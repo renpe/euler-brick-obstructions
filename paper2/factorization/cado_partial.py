@@ -40,10 +40,10 @@ import pub_db
 CADO_NFS = pub_db.CADO_NFS
 CADO_VENV_PY = pub_db.CADO_VENV_PY
 
-# Break-even YAFU vs. CADO-NFS liegt empirisch bei ~84 Stellen Residuum
-# (Hit 187370: 84 Stellen, CADO ≈ 2.7 min). Darunter ist YAFU schneller,
-# darüber CADO. Wir wählen also nur Partials mit Residuum >= 84 Stellen
-# und davon den kleinsten zuerst (kürzester CADO-Run).
+# Break-even YAFU vs. CADO-NFS empirically lies at ~84-digit residual
+# (Hit 187370: 84 digits, CADO ~ 2.7 min). Below that YAFU is faster,
+# above that CADO. So we pick only partials with residual >= 84 digits
+# and of those the smallest first (shortest CADO run).
 MIN_RESIDUAL_DIGITS = 84
 
 
@@ -198,8 +198,8 @@ def main():
         if hit_id_arg is not None:
             process_one(conn, hit_id_arg)
             return
-        # Loop-Modus: nimm immer den nächsten kleinsten Kandidaten >= 84 Stellen,
-        # bis keiner mehr da ist. SIGINT bricht sauber zwischen zwei Hits ab.
+        # Loop mode: always pick the next smallest candidate >= 84 digits,
+        # until none are left. SIGINT cleanly breaks between two hits.
         n_done = 0
         while True:
             print(f"\n========== Loop iteration {n_done+1} ==========", flush=True)

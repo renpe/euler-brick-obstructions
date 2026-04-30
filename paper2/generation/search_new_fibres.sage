@@ -1,13 +1,13 @@
 """
-Systematische Suche nach neuen hochrangigen (m,n)-Fasern.
+Systematic search for new high-rank (m,n) fibers.
 
-Iteriert (m, n) mit gcd=1, (m-n) ungerade über m ∈ [2, M_MAX].
-Berechnet analytic_rank für E_{m,n}. Bei Rang ≥ 2 in CSV speichern.
+Iterates (m, n) with gcd=1, (m-n) odd over m ∈ [2, M_MAX].
+Computes analytic_rank for E_{m,n}. Saves to CSV when rank >= 2.
 
 Skip:
-  - Familien-Fasern (Saunderson/Himane/Lenhart) aus family_mn_skip.json
+  - Family fibers (Saunderson/Himane/Lenhart) from family_mn_skip.json
   - (88, 7)
-  - alle (m, n), die schon in master_hits vorkommen
+  - all (m, n) already present in master_hits
 
 Output: rank_scan.csv (m, n, analytic_rank)
 """
@@ -24,13 +24,13 @@ import sys
 pari.allocatemem(2 * 10**9)
 
 DB = "host=192.168.178.63 port=5432 dbname=euler user=euler password=euler"
-# Argumente: M_MAX [WORKER_ID] [NUM_WORKERS] [M_MIN]
+# Arguments: M_MAX [WORKER_ID] [NUM_WORKERS] [M_MIN]
 M_MAX = int(sys.argv[1]) if len(sys.argv) > 1 else 200
 WORKER_ID = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 NUM_WORKERS = int(sys.argv[3]) if len(sys.argv) > 3 else 1
 M_MIN = int(sys.argv[4]) if len(sys.argv) > 4 else 2
 OUT_FILE = f"rank_scan_w{WORKER_ID}of{NUM_WORKERS}_max{M_MAX}.csv"
-RANK_TIMEOUT = 30  # Sekunden harter Timeout für analytic_rank
+RANK_TIMEOUT = 30  # seconds, hard timeout for analytic_rank
 
 
 def compute_rank(m_p, n_p):
@@ -61,8 +61,8 @@ def compute_rank(m_p, n_p):
 def main():
     print(f"M_MAX = {M_MAX}", flush=True)
 
-    # Skip-Liste direkt aus pub.hit_groups lesen
-    print("Lade Familien-Fasern aus pub.hit_groups...", flush=True)
+    # Read skip list directly from pub.hit_groups
+    print("Loading family fibers from pub.hit_groups...", flush=True)
     conn = psycopg.connect(DB)
     cur = conn.cursor()
     cur.execute("""
@@ -76,16 +76,16 @@ def main():
     skip_mn.add((88, 7))  # explicit, paper §3 example fibre
     print(f"  {len(skip_mn)} family/skip (m,n)")
 
-    # DB-bekannte (m, n)
-    print("Lade DB-(m,n) aus pub.master_hits...", flush=True)
+    # DB-known (m, n)
+    print("Loading DB-(m,n) from pub.master_hits...", flush=True)
     cur.execute("SELECT DISTINCT m, n FROM pub.master_hits")
     db_mn = set((int(m), int(n)) for m, n in cur.fetchall())
     conn.close()
     print(f"  {len(db_mn)} DB-(m,n)")
 
-    # Faser-Kandidaten: jeder Worker nimmt m % NUM_WORKERS == WORKER_ID
+    # Fiber candidates: each worker takes m % NUM_WORKERS == WORKER_ID
     print(f"Worker {WORKER_ID}/{NUM_WORKERS}, m ∈ [{M_MIN}, {M_MAX}], "
-          f"nimmt m mit m %% {NUM_WORKERS} == {WORKER_ID}", flush=True)
+          f"taking m with m %% {NUM_WORKERS} == {WORKER_ID}", flush=True)
     todo = []
     for m_p in range(M_MIN, M_MAX + 1):
         if m_p % NUM_WORKERS != WORKER_ID: continue
@@ -95,9 +95,9 @@ def main():
             if (m_p, n_p) in skip_mn: continue
             if (m_p, n_p) in db_mn: continue
             todo.append((m_p, n_p))
-    print(f"  {len(todo)} (m,n)-Kandidaten zu testen")
+    print(f"  {len(todo)} (m,n) candidates to test")
 
-    # Resume: bereits im CSV vorhandene Paare überspringen
+    # Resume: skip pairs already present in the CSV
     seen = set()
     if os.path.exists(OUT_FILE):
         with open(OUT_FILE) as f:
@@ -105,16 +105,16 @@ def main():
             for row in reader:
                 if len(row) >= 2 and row[0] != 'm':
                     seen.add((int(row[0]), int(row[1])))
-        print(f"  Resume: {len(seen)} bereits gescannt")
+        print(f"  Resume: {len(seen)} already scanned")
 
     todo = [(m, n) for m, n in todo if (m, n) not in seen]
-    print(f"  {len(todo)} verbleibend\n", flush=True)
+    print(f"  {len(todo)} remaining\n", flush=True)
 
     if not todo:
-        print("Nichts zu tun.")
+        print("Nothing to do.")
         return
 
-    # CSV öffnen, falls neu Header schreiben
+    # Open CSV, write header if new
     is_new = not os.path.exists(OUT_FILE) or os.path.getsize(OUT_FILE) == 0
     fout = open(OUT_FILE, 'a', buffering=1)
     if is_new:
@@ -143,8 +143,8 @@ def main():
             last_report = now
 
     fout.close()
-    print(f"\nFERTIG in {(time()-t0)/60:.1f} min")
-    print(f"  Hochrangige (≥2): {n_high}")
+    print(f"\nDONE in {(time()-t0)/60:.1f} min")
+    print(f"  High-rank (>=2): {n_high}")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
 -- ============================================================
--- Publication-Schema für die Master-Hit-Datenbank
+-- Publication schema for the Master-Hit database
 -- ============================================================
--- Erstellt ein eigenes Schema 'pub' in der DB 'euler', das schlank,
--- dokumentierbar und veröffentlichungsreif ist. Die alte 'public.master_hits'
--- bleibt als Arbeits-DB unangetastet.
+-- Creates a dedicated schema 'pub' in the DB 'euler' that is lean,
+-- documentable, and publication-ready. The old 'public.master_hits'
+-- remains untouched as the working DB.
 --
--- Anwenden:
+-- Apply:
 --   PGPASSWORD=euler psql -h 192.168.178.63 -U euler -d euler -f pub_schema.sql
 -- ============================================================
 
@@ -13,12 +13,12 @@ CREATE SCHEMA IF NOT EXISTS pub;
 SET search_path TO pub, public;
 
 -- ============================================================
--- master_hits: schlanke Haupttabelle
+-- master_hits: lean main table
 -- ============================================================
 DROP TABLE IF EXISTS pub.master_hits CASCADE;
 CREATE TABLE pub.master_hits (
     id           bigserial PRIMARY KEY,
-    -- Euclid-Parameter (a > b > 0, m > n > 0, gcd=1, a-b und m-n ungerade)
+    -- Euclid parameters (a > b > 0, m > n > 0, gcd=1, a-b and m-n odd)
     a            numeric NOT NULL,
     b            numeric NOT NULL,
     m            numeric NOT NULL,
@@ -49,20 +49,20 @@ COMMENT ON COLUMN pub.master_hits.f1 IS '(W1*U2)^2 + (U1*V2)^2; the space-diagon
 COMMENT ON COLUMN pub.master_hits.num_blockers IS 'Count of primes with odd exponent in f1; NULL until factorisation completes.';
 
 -- ============================================================
--- fibers: eine Zeile pro (m,n) für MW-aktive Fasern
+-- fibers: one row per (m,n) for MW-active fibers
 -- ============================================================
 DROP TABLE IF EXISTS pub.fibers CASCADE;
 CREATE TABLE pub.fibers (
     id              serial PRIMARY KEY,
     m               numeric NOT NULL,
     n               numeric NOT NULL,
-    -- Weierstrass-Koeffizienten [a1, a2, a3, a4, a6]
+    -- Weierstrass coefficients [a1, a2, a3, a4, a6]
     weierstrass     numeric[],
     conductor       numeric,
-    rank_known      integer,           -- bekannter Rang (möglicherweise nur Untergrenze)
+    rank_known      integer,           -- known rank (possibly only a lower bound)
     rank_proven     boolean DEFAULT false,
-    torsion         text,              -- z.B. "Z/2Z x Z/4Z"
-    generators      jsonb,             -- Liste von [X, Y]-Paaren
+    torsion         text,              -- e.g. "Z/2Z x Z/4Z"
+    generators      jsonb,             -- list of [X, Y] pairs
     UNIQUE (m, n)
 );
 
@@ -71,17 +71,17 @@ CREATE INDEX idx_pub_fibers_rank ON pub.fibers (rank_known);
 COMMENT ON TABLE  pub.fibers IS 'Elliptic fibre E_{m,n} of the Master-Hit variety, one row per (m,n) covered by Mordell-Weil generation.';
 
 -- ============================================================
--- generator_groups: Hierarchie aller Familien und Provenance-Tags
+-- generator_groups: hierarchy of all families and provenance tags
 -- ============================================================
 DROP TABLE IF EXISTS pub.generator_groups CASCADE;
 CREATE TABLE pub.generator_groups (
     id              serial PRIMARY KEY,
-    short_name      text UNIQUE NOT NULL,    -- z.B. 'Saunderson', 'MW-88-7'
+    short_name      text UNIQUE NOT NULL,    -- e.g. 'Saunderson', 'MW-88-7'
     parent_id       integer REFERENCES pub.generator_groups(id),
     category        text NOT NULL CHECK (category IN ('family', 'provenance')),
     description     text,
     citation        text,
-    -- Optional: für MW-Untergruppen, Verweis auf fibers
+    -- Optional: for MW subgroups, reference to fibers
     fiber_id        integer REFERENCES pub.fibers(id)
 );
 
@@ -92,14 +92,14 @@ COMMENT ON TABLE pub.generator_groups IS
 'Hierarchical taxonomy. category=family: algebraic family (what the brick IS). category=provenance: discovery origin (HOW the brick was found).';
 
 -- ============================================================
--- hit_groups: n:m Verknüpfung Hit ↔ Gruppen
+-- hit_groups: n:m link Hit <-> Groups
 -- ============================================================
 DROP TABLE IF EXISTS pub.hit_groups CASCADE;
 CREATE TABLE pub.hit_groups (
     hit_id          bigint NOT NULL REFERENCES pub.master_hits(id) ON DELETE CASCADE,
     group_id        integer NOT NULL REFERENCES pub.generator_groups(id),
-    is_primary      boolean DEFAULT false,   -- True für die ursprüngliche Quelle
-    details         jsonb,                   -- z.B. {"scalar_vector": [1,0,-1], "torsion_index": 0}
+    is_primary      boolean DEFAULT false,   -- True for the original source
+    details         jsonb,                   -- e.g. {"scalar_vector": [1,0,-1], "torsion_index": 0}
     PRIMARY KEY (hit_id, group_id)
 );
 
@@ -107,14 +107,14 @@ CREATE INDEX idx_pub_hg_group     ON pub.hit_groups (group_id);
 CREATE INDEX idx_pub_hg_primary   ON pub.hit_groups (hit_id) WHERE is_primary;
 
 -- ============================================================
--- f1_factors: Primfaktorisierung von f1
+-- f1_factors: prime factorization of f1
 -- ============================================================
 DROP TABLE IF EXISTS pub.f1_factors CASCADE;
 CREATE TABLE pub.f1_factors (
     hit_id          bigint NOT NULL REFERENCES pub.master_hits(id) ON DELETE CASCADE,
     prime           numeric NOT NULL,
     exponent        integer NOT NULL,
-    is_blocker      boolean NOT NULL,        -- exponent ungerade
+    is_blocker      boolean NOT NULL,        -- exponent odd
     prime_mod4      integer,
     PRIMARY KEY (hit_id, prime)
 );
@@ -123,7 +123,7 @@ CREATE INDEX idx_pub_f1f_blocker ON pub.f1_factors (hit_id) WHERE is_blocker;
 CREATE INDEX idx_pub_f1f_prime   ON pub.f1_factors (prime);
 
 -- ============================================================
--- db_metadata: Version, Snapshot-Datum, Statistiken
+-- db_metadata: version, snapshot date, statistics
 -- ============================================================
 DROP TABLE IF EXISTS pub.db_metadata CASCADE;
 CREATE TABLE pub.db_metadata (
@@ -138,7 +138,7 @@ INSERT INTO pub.db_metadata (key, value) VALUES
     ('source_database', 'euler.public.master_hits');
 
 -- ============================================================
--- Top-Level-Gruppen (statische Definitionen)
+-- Top-level groups (static definitions)
 -- ============================================================
 
 INSERT INTO pub.generator_groups (short_name, parent_id, category, description, citation) VALUES
@@ -200,7 +200,7 @@ SELECT 'Exhaustive-Bound-2300', id, 'provenance', 'Exhaustive search up to bound
 FROM pub.generator_groups WHERE short_name='Exhaustive-Search';
 
 -- ============================================================
--- View: hit_taxonomy für einfache Auswertung
+-- View: hit_taxonomy for easy analysis
 -- ============================================================
 CREATE OR REPLACE VIEW pub.hit_taxonomy AS
 SELECT
@@ -208,12 +208,12 @@ SELECT
     h.a, h.b, h.m, h.n,
     h.x_prim, h.y_prim, h.z_prim,
     h.num_blockers,
-    -- Aggregierte Familie-Tags
+    -- Aggregated family tags
     (SELECT array_agg(g.short_name ORDER BY g.short_name)
      FROM pub.hit_groups hg
      JOIN pub.generator_groups g ON g.id = hg.group_id
      WHERE hg.hit_id = h.id AND g.category = 'family') AS families,
-    -- Primärer Provenance-Tag
+    -- Primary provenance tag
     (SELECT g.short_name
      FROM pub.hit_groups hg
      JOIN pub.generator_groups g ON g.id = hg.group_id

@@ -1,13 +1,13 @@
 """
-Gemeinsame DB-Helper für das pub-Schema.
+Shared DB helpers for the pub schema.
 
-Wird von allen Skripten in scripts/paper4/ importiert. Kapselt:
-  - Connection-Setup mit konfigurierbarer DB
-  - Insert eines Master-Hits inkl. hit_groups (Provenance)
-  - Lookup von group_id für eine Provenance
+Imported by all scripts in scripts/paper4/. Encapsulates:
+  - Connection setup with configurable DB
+  - Insert of a Master-Hit including hit_groups (provenance)
+  - Lookup of group_id for a provenance
 
-Niemals direkt INSERT INTO pub.master_hits machen — immer durch
-insert_master_hit(), damit Provenance konsistent gepflegt wird.
+Never INSERT INTO pub.master_hits directly - always go through
+insert_master_hit() so that provenance is maintained consistently.
 """
 from __future__ import annotations
 

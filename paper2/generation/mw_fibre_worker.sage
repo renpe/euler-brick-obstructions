@@ -1,10 +1,10 @@
 """
-Single-Faser-Worker. Argumente: m_p n_p MAX_SCALAR [DESCENT_LIMIT]
+Single-fiber worker. Arguments: m_p n_p MAX_SCALAR [DESCENT_LIMIT]
 Output (stdout, JSON):
   {"status": "ok"|"fail"|"nogens", "gens_count": k, "candidates": [[a,b], ...]}
 
-Wird als subprocess vom dispatcher aufgerufen, der einen harten Timeout setzt.
-DB-Inserts macht der dispatcher, nicht der worker.
+Called as a subprocess from the dispatcher, which sets a hard timeout.
+DB inserts are done by the dispatcher, not the worker.
 """
 from sage.all import *
 import json
@@ -39,7 +39,7 @@ def main():
         print(json.dumps({"status": "fail", "reason": f"curve: {ex}"}))
         return
 
-    # Versuche E.gens() ohne Timeout (subprocess-Timeout greift)
+    # Try E.gens() without timeout (subprocess timeout applies)
     gens = None
     try:
         gens = list(E.gens(proof=False, descent_second_limit=descent_limit))
@@ -64,7 +64,7 @@ def main():
     except Exception:
         gens = None
 
-    # Fallback: DB-Punkte heben
+    # Fallback: lift DB points
     if gens is None or len(gens) == 0:
         try:
             conn = psycopg.connect(DB)
@@ -97,7 +97,7 @@ def main():
             print(json.dumps({"status": "nogens", "gens_count": 0, "candidates": []}))
             return
 
-    # Skalar-Mult
+    # Scalar multiplication
     tors = list(E.torsion_subgroup())
     seen_X = set()
     candidates = []

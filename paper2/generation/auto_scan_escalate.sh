@@ -1,11 +1,11 @@
 #!/bin/bash
-# Phasen-Eskalation mit disjunkten m-Bereichen + Auto-Rerun von ★-Treffern.
+# Phase escalation with disjoint m-ranges + auto-rerun of ★-hits.
 #
 # Phase 1: m ∈ [2, 200]
 # Phase 2: m ∈ [201, 500]
 # Phase 3: m ∈ [501, 1000]
 #
-# Nach jeder Phase: merge CSVs, extrahiere Rang≥2-Fasern, mw_rerun.py darauf.
+# After each phase: merge CSVs, extract rank>=2 fibers, run mw_rerun.py on them.
 
 set -u
 source ~/miniforge3/etc/profile.d/conda.sh
@@ -29,7 +29,7 @@ run_phase_workers() {
     local M_MIN=$1
     local M_MAX=$2
     echo "" >> "$LOG"
-    echo "=== Phase m∈[$M_MIN, $M_MAX] gestartet $(date -Iseconds) ===" >> "$LOG"
+    echo "=== Phase m∈[$M_MIN, $M_MAX] started $(date -Iseconds) ===" >> "$LOG"
     local pids=()
     for i in $(seq 0 $((NUM_WORKERS-1))); do
         sage search_new_fibres.sage $M_MAX $i $NUM_WORKERS $M_MIN \
@@ -54,21 +54,21 @@ merge_and_rerun() {
     done
     local hits=$(awk -F, 'NR>1 && $3>=2' "$merged" | wc -l)
     echo "" >> "$LOG"
-    echo "=== Phase m≤$M_MAX merge fertig $(date -Iseconds), Rang≥2: $hits ===" >> "$LOG"
+    echo "=== Phase m<=$M_MAX merge done $(date -Iseconds), rank>=2: $hits ===" >> "$LOG"
     awk -F, 'NR>1 && $3>=2 {print "  ★ ("$1","$2") rank="$3}' "$merged" >> "$LOG"
 
     if [ "$hits" -gt 0 ]; then
         local stars=$(awk -F, 'NR>1 && $3>=2 {print "["$1","$2"]"}' "$merged" | paste -sd ',')
         local stars_json="[$stars]"
-        echo "  Auto-Rerun startet: $stars_json" >> "$LOG"
-        # 4 Worker, 600s timeout, descent_limit=20, MAX_SCALAR=5 (mehr Punkte pro Faser)
+        echo "  Auto-rerun starting: $stars_json" >> "$LOG"
+        # 4 workers, 600s timeout, descent_limit=20, MAX_SCALAR=5 (more points per fiber)
         "$PYTHON" mw_rerun.py "$stars_json" 600 20 5 >> "$LOG" 2>&1
-        echo "  Auto-Rerun fertig $(date -Iseconds)" >> "$LOG"
+        echo "  Auto-rerun done $(date -Iseconds)" >> "$LOG"
     fi
 }
 
 echo "" >> "$LOG"
-echo "===== auto_scan_escalate_v2 gestartet $(date -Iseconds), Workers=$NUM_WORKERS =====" >> "$LOG"
+echo "===== auto_scan_escalate_v2 started $(date -Iseconds), Workers=$NUM_WORKERS =====" >> "$LOG"
 
 # Phase 1 (m≤200): start fresh (Resume from CSV)
 run_phase_workers 2 200
@@ -83,4 +83,4 @@ run_phase_workers 501 1000
 merge_and_rerun 1000
 
 echo "" >> "$LOG"
-echo "===== ALLE PHASEN FERTIG $(date -Iseconds) =====" >> "$LOG"
+echo "===== ALL PHASES DONE $(date -Iseconds) =====" >> "$LOG"
