@@ -1,23 +1,23 @@
 """
-Pilot: Jacobian-Zerlegung des Genus-2-Modells C_{m,n} über die zwei
-Bedingungen Master-Tupel + perfekter-Cuboid.
+Pilot: Jacobian decomposition of the genus-2 model C_{m,n} via the two
+conditions master tuple + perfect cuboid.
 
-Aus der Identitätenanalyse folgt für festes (m, n):
-  E_{m,n}:  y² = V₂² t⁴ + (4U₂² − 2V₂²) t² + V₂²        (Master-Tupel)
-  E'_{m,n}: y² = W₂² t⁴ + 2(U₂² − V₂²) t² + W₂²         (perfekter Cuboid)
+From the identity analysis we get for fixed (m, n):
+  E_{m,n}:  y^2 = V2^2 t^4 + (4 U2^2 - 2 V2^2) t^2 + V2^2        (master tuple)
+  E'_{m,n}: y^2 = W2^2 t^4 + 2 (U2^2 - V2^2) t^2 + W2^2          (perfect cuboid)
 
-Die Schnittpunkte ihrer rationalen Punkte = perfekte Euler-Cuboids.
-Konjektur B ⟺ der Schnitt ist trivial.
+The intersection of their rational points = perfect Euler cuboids.
+Conjecture B <=> the intersection is trivial.
 
-Dieses Skript:
-  1. Bauen E_{m,n} und E'_{m,n} als WeierstraSS-Modelle in Sage.
-  2. Berechnet rk(E) und rk(E') via PARI ellrank.
-  3. Listet bekannte rationale Punkte auf E' (mit kleinen Höhen).
-  4. Sucht nicht-triviale Schnittpunkte E ∩ E' (= cuboid-Kandidaten).
+This script:
+  1. Builds E_{m,n} and E'_{m,n} as Weierstrass models in Sage.
+  2. Computes rk(E) and rk(E') via PARI ellrank.
+  3. Lists known rational points on E' (with small heights).
+  4. Searches for non-trivial intersection points E ∩ E' (= cuboid candidates).
 
-Aufruf:
+Usage:
     sage cuboid_genus2_pilot.sage [M_MAX]
-    Default: 30 — alle teilerfremden (m, n) mit m≤30, m-n ungerade
+    Default: 30 - all coprime (m, n) with m <= 30, m-n odd
 """
 from sage.all import *
 import sys
@@ -42,8 +42,8 @@ def with_timeout(seconds, fn):
 
 
 def build_curves(m, n):
-    """Liefert (E_master, E_cuboid) als EllipticCurve-Objekte aus den
-    Quartiken via PARI ellfromeqn."""
+    """Return (E_master, E_cuboid) as EllipticCurve objects from the
+    quartics via PARI ellfromeqn."""
     U2 = m*m - n*n
     V2 = 2*m*n
     W2 = m*m + n*n
@@ -58,7 +58,7 @@ def build_curves(m, n):
 
 
 def rank_info(E):
-    """Sicheres ellrank mit Timeout. Liefert (rl, ru) oder (None, None)."""
+    """Safe ellrank with timeout. Returns (rl, ru) or (None, None)."""
     try:
         result = with_timeout(TIMEOUT, lambda: E.pari_curve().ellrank())
         return int(result[0]), int(result[1])

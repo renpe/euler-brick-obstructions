@@ -1,17 +1,17 @@
 """
-Finalisierung des Chabauty-Beweises für die 11 Chabauty-anwendbaren
-Fasern (rk(J(H_{m,n})) < 3).
+Finalization of the Chabauty proof for the 11 Chabauty-applicable
+fibers (rk(J(H_{m,n})) < 3).
 
-Strategie:
-  1. Bestätige Rank-Bound rk(J(H)) ≤ 2 (haben wir).
-  2. Suche ALLE rationalen Punkte auf H bis sehr hohem B (10⁶ oder 10⁷).
-  3. Wenn nur die 6 trivialen Punkte → empirische Quasi-Chabauty.
-  4. Pari hyperellratpoints ist exhaustiv bis B (rigoros).
+Strategy:
+  1. Confirm rank bound rk(J(H)) <= 2 (we have it).
+  2. Search ALL rational points on H up to very high B (10^6 or 10^7).
+  3. If only the 6 trivial points -> empirical quasi-Chabauty.
+  4. PARI hyperellratpoints is exhaustive up to B (rigorous).
 
-Ein RIGOROSER Chabauty-Beweis bräuchte zusätzlich p-adische Coleman-
-Integration. Für die Empirie genügt die hohe Bound.
+A RIGOROUS Chabauty proof would additionally require p-adic Coleman
+integration. For empirical purposes the high bound suffices.
 
-Aufruf: sage jh_chabauty_finalize.sage [B]
+Usage: sage jh_chabauty_finalize.sage [B]
 Default: B=1000000
 """
 from sage.all import *
@@ -35,7 +35,7 @@ def with_timeout(seconds, fn):
         signal.alarm(int(0))
 
 
-# Die 11 Chabauty-anwendbaren Fasern aus dem Pilot
+# The 11 Chabauty-applicable fibers from the pilot
 CHABAUTY_FIBERS = [
     (2, 1), (3, 2), (4, 1), (4, 3), (6, 1), (7, 2),
     (7, 6), (8, 1), (11, 6), (12, 1), (12, 5),
@@ -43,7 +43,7 @@ CHABAUTY_FIBERS = [
 
 
 def main():
-    print(f"Höhen-Bound B = {B}\n")
+    print(f"Height bound B = {B}\n")
     print(f"{'(m,n)':>10} {'#points':>8} {'#non-trivial':>13} {'time':>8}")
 
     total_pts = 0
@@ -73,10 +73,10 @@ def main():
         n_nontriv = 0
         nontrivials = []
         for (tval, vval) in pts:
-            # trivial: t = 0, ±1
+            # trivial: t = 0, +-1
             if tval == 0 or abs(tval) == 1:
                 continue
-            # Sonst: prüfe Cuboid-Kandidat
+            # Otherwise: check cuboid candidate
             P_val = P.subs({T: tval})
             Q_val = Q.subs({T: tval})
             if P_val.is_square() and Q_val.is_square():
@@ -91,17 +91,17 @@ def main():
         print(f"{f'({m},{n})':>10} {len(pts):>8} {n_nontriv:>13} {elapsed:>8.1f}")
         sys.stdout.flush()
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Gesamt-Höhensuche bis B={B}")
-    print(f"Gesamt rationale Punkte (trivial + nicht-trivial): {total_pts}")
-    print(f"Davon nicht-trivial (möglicher Cuboid): {total_nontriv}")
+    print(f"\n========== Summary ==========")
+    print(f"Total height search up to B={B}")
+    print(f"Total rational points (trivial + non-trivial): {total_pts}")
+    print(f"Of which non-trivial (potential cuboid): {total_nontriv}")
     if suspicious:
-        print(f"\n★★★ NICHT-TRIVIAL GEFUNDEN ★★★")
+        print(f"\n*** NON-TRIVIAL FOUND ***")
         for m, n, ts in suspicious:
             print(f"  ({m},{n}): {ts}")
     else:
-        print("\nKein nicht-trivialer Punkt → Konjektur B rigoros (modulo Chabauty-formality)")
-        print(f"auf {len(CHABAUTY_FIBERS)} Fasern bewiesen.")
+        print("\nNo non-trivial point -> Conjecture B rigorous (modulo Chabauty formality)")
+        print(f"proved on {len(CHABAUTY_FIBERS)} fibers.")
 
 
 if __name__ == "__main__":

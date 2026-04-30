@@ -1,15 +1,15 @@
 """
-Verifizierung: was ist der WIRKLICHE Genus der Cuboid-Kurve?
+Verification: what is the ACTUAL genus of the cuboid curve?
 
-Wir hatten behauptet: J(C_{m,n}) = E_{m,n} × E'_{m,n}, also Genus 2.
-Bei genauerem Nachrechnen (Riemann-Hurwitz) deutet aber alles auf
-Genus 5 hin (Cover von einem Genus-1 via t² = s, mit 8 Verzweigungs-
-punkten statt der von mir angenommenen 2).
+We had claimed: J(C_{m,n}) = E_{m,n} x E'_{m,n}, hence genus 2.
+On a more careful check (Riemann-Hurwitz), everything points to
+genus 5 (cover of a genus-1 via t^2 = s, with 8 ramification
+points instead of the 2 I had assumed).
 
-Wir setzen die Hyperelliptische Form direkt auf:
-  v² = P(t²) · Q(t²)  — wobei v = y·w
-P, Q sind Quadratiken in s = t², also P·Q ist Grad 8 in t.
-Das ist ein hyperelliptisches Modell GR der Kurve.
+We set up the hyperelliptic form directly:
+  v^2 = P(t^2) * Q(t^2)  - where v = y * w
+P, Q are quadratics in s = t^2, so P*Q is degree 8 in t.
+This is a hyperelliptic model GR of the curve.
 """
 from sage.all import *
 import sys
@@ -28,7 +28,7 @@ def main():
         P = V2**2 * T**4 + (4*U2**2 - 2*V2**2) * T**2 + V2**2
         Q = W2**2 * T**4 + 2*(U2**2 - V2**2) * T**2 + W2**2
         product = P * Q
-        # v² = product, hyperelliptic curve
+        # v^2 = product, hyperelliptic curve
         # Calc genus via Hyperelliptic
         H = HyperellipticCurve(product, 0)
         g = H.genus()
@@ -37,8 +37,8 @@ def main():
         print(f"  P(t) = {P}")
         print(f"  Q(t) = {Q}")
         print(f"  P*Q (degree {product.degree()}, squarefree? {product.is_squarefree()})")
-        print(f"  Hyperelliptic curve v² = P(t)·Q(t) has Genus = {g}")
-        print(f"  → Jacobian dim = {g}")
+        print(f"  Hyperelliptic curve v^2 = P(t)*Q(t) has Genus = {g}")
+        print(f"  -> Jacobian dim = {g}")
         # Decomposition test: does the Jacobian decompose?
         try:
             J = H.jacobian()

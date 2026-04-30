@@ -1,12 +1,12 @@
 """
-Erkundung: wie verteilen sich Hits aus einer (g₊, g₋)-Faser über (m, n)?
+Exploration: how do hits from a (g_+, g_-) fiber distribute over (m, n)?
 
-Wir wählen z.B. (g₊=9, g₋=1) — die größte Saund⁺-Faser mit 14086 Hits — und
-schauen, ob die Punkte in wenigen (m,n)-Subfasern konzentriert sind oder
-breit gestreut. Falls konzentriert: wir können pro (g₊, g₋, m, n) eine
-elliptische (Sub-)Kurve aufstellen und Mordell-Weil rechnen.
+We pick e.g. (g_+ = 9, g_- = 1) - the largest Saund+ fiber with 14086 hits -
+and look whether the points are concentrated on few (m,n) sub-fibers or
+broadly scattered. If concentrated: we can set up an elliptic (sub)curve
+per (g_+, g_-, m, n) and compute Mordell-Weil.
 
-Aufruf:
+Usage:
     python3 gpm_subfiber_explore.py [g_plus] [g_minus]
     Default: 9 1
 """
@@ -42,21 +42,21 @@ def main():
         if gp == target_gp and gm == target_gm:
             in_fiber.append((int(hid), a, b, m, n, nb))
 
-    print(f"(g₊={target_gp}, g₋={target_gm}): {len(in_fiber)} Hits.\n")
+    print(f"(g_+={target_gp}, g_-={target_gm}): {len(in_fiber)} hits.\n")
 
-    # --- Verteilung über (m, n) -------------------------------------
+    # --- Distribution over (m, n) -----------------------------------
     mn_counter = Counter((m, n) for _, _, _, m, n, _ in in_fiber)
-    print(f"Anzahl distinkter (m, n)-Subfasern: {len(mn_counter)}")
-    print(f"Maximale Hits pro (m, n):           {max(mn_counter.values())}")
-    print(f"Median Hits pro (m, n):             "
+    print(f"Number of distinct (m, n) sub-fibers: {len(mn_counter)}")
+    print(f"Maximum hits per (m, n):              {max(mn_counter.values())}")
+    print(f"Median hits per (m, n):               "
           f"{sorted(mn_counter.values())[len(mn_counter)//2]}")
-    print(f"Subfasern mit nur 1 Hit:            "
+    print(f"Sub-fibers with only 1 hit:           "
           f"{sum(1 for v in mn_counter.values() if v == 1)}")
-    print(f"Subfasern mit ≥10 Hits:             "
+    print(f"Sub-fibers with >=10 hits:            "
           f"{sum(1 for v in mn_counter.values() if v >= 10)}")
     print()
 
-    print("=== Top 15 (m, n)-Subfasern in dieser Faser ===")
+    print("=== Top 15 (m, n) sub-fibers in this fiber ===")
     print(f"{'m':>5} {'n':>5} {'#hits':>6} {'min_b':>6} {'max_b':>6}")
     for (m, n), c in mn_counter.most_common(15):
         bs = [int(nb) for hid, a, b, mm, nn, nb in in_fiber
@@ -66,18 +66,18 @@ def main():
         else:
             print(f"{m:>5} {n:>5} {c:>6} {'-':>6} {'-':>6}")
 
-    # --- Verteilung über (a, b) -------------------------------------
+    # --- Distribution over (a, b) -----------------------------------
     print()
     ab_counter = Counter((a, b) for _, a, b, _, _, _ in in_fiber)
-    print(f"Anzahl distinkter (a, b)-Werte:     {len(ab_counter)}")
-    print(f"Top (a, b) mit den meisten Hits (= verschiedene m,n):")
+    print(f"Number of distinct (a, b) values:   {len(ab_counter)}")
+    print(f"Top (a, b) with most hits (= different m,n):")
     for (a, b), c in ab_counter.most_common(10):
-        print(f"  (a,b)=({a},{b}): {c} verschiedene (m,n)")
+        print(f"  (a,b)=({a},{b}): {c} different (m,n)")
 
-    # --- Single-Blocker innerhalb dieser Faser ----------------------
+    # --- Single blockers within this fiber --------------------------
     sb = [(hid, a, b, m, n) for hid, a, b, m, n, nb in in_fiber if nb == 1]
-    print(f"\n=== Single-Blocker in (g₊={target_gp}, g₋={target_gm}) ===")
-    print(f"Anzahl: {len(sb)}")
+    print(f"\n=== Single blockers in (g_+={target_gp}, g_-={target_gm}) ===")
+    print(f"Count: {len(sb)}")
     for hid, a, b, m, n in sb[:20]:
         print(f"  hit_id={hid}: (a,b,m,n)=({a},{b},{m},{n})")
 

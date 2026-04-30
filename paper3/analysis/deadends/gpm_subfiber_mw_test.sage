@@ -1,21 +1,21 @@
 """
-Strukturtest: Ist die (g₊=9, g₋=1)-Schicht innerhalb der elliptischen Kurve
-E_{2368,1207} eine Untergruppe / ein Coset?
+Structure test: is the (g_+ = 9, g_- = 1) layer inside the elliptic curve
+E_{2368,1207} a subgroup / a coset?
 
-Vorgehen:
-  1. Lade alle 733 (a,b)-Hits aus pub.master_hits mit (m,n)=(2368,1207),
-     g₊=9, g₋=1.
-  2. Hebe sie zu Punkten auf E.
-  3. Für eine Stichprobe (P_i, P_j) berechne Q = P_i + P_j auf E.
-  4. Hebe Q zurück zu (a, b) und berechne (g₊, g₋) für (a, b, m, n).
-  5. Sammle die Verteilung — ist sie konzentriert auf eine Faser?
+Procedure:
+  1. Load all 733 (a,b) hits from pub.master_hits with (m,n)=(2368,1207),
+     g_+=9, g_-=1.
+  2. Lift them to points on E.
+  3. For a sample (P_i, P_j) compute Q = P_i + P_j on E.
+  4. Lift Q back to (a, b) and compute (g_+, g_-) for (a, b, m, n).
+  5. Collect the distribution - is it concentrated on one fiber?
 
-Ergebnisse:
-  - „abgeschlossen" → die (9,1)-Schicht ist eine Untergruppe.
-  - „immer (g_+', g_-') ≠ (9,1) aber konstant" → Coset.
-  - „streut über viele Fasern" → keine Gruppen-Struktur.
+Results:
+  - "closed" -> the (9,1) layer is a subgroup.
+  - "always (g_+', g_-') != (9,1) but constant" -> coset.
+  - "scatters across many fibers" -> no group structure.
 
-Aufruf:
+Usage:
     sage gpm_subfiber_mw_test.sage [m] [n] [g_plus] [g_minus] [n_pairs]
     Default: 2368 1207 9 1 200
 """
@@ -36,7 +36,7 @@ target_gp = int(sys.argv[3]) if len(sys.argv) > 3 else 9
 target_gm = int(sys.argv[4]) if len(sys.argv) > 4 else 1
 n_pairs = int(sys.argv[5]) if len(sys.argv) > 5 else 200
 
-print(f"Test: (m,n)=({m_p},{n_p}), Ziel-Faser (g₊,g₋)=({target_gp},{target_gm}),"
+print(f"Test: (m,n)=({m_p},{n_p}), target fiber (g_+,g_-)=({target_gp},{target_gm}),"
       f" n_pairs={n_pairs}")
 
 # --- Build the elliptic curve ----------------------------------------
@@ -61,7 +61,7 @@ fT = A*T**4 + B*T**2 + C
 
 
 def ab_to_point(a, b):
-    """Lift (a,b) → point on E. Returns None on failure."""
+    """Lift (a,b) -> point on E. Returns None on failure."""
     t = QQ(a) / QQ(b)
     s_sq = fT.subs(T=t)
     if not s_sq.is_square():
@@ -99,15 +99,15 @@ def point_to_ab_one(P):
     return (int(a), int(b))
 
 
-# Vorab: alle Torsionspunkte der Kurve (klein, in der Regel ≤ 4 Punkte)
+# Precompute: all torsion points of the curve (small, usually <= 4 points)
 TORSION = list(E.torsion_subgroup())
 print(f"|E_torsion(Q)| = {len(TORSION)}")
 
 
 def point_to_ab_all_sigs(P, m, n):
-    """Sammelt alle (g₊, g₋)-Signaturen, die durch Torsions-Translate von P
-    erreichbar sind. Das ist die volle Information modulo der trivialen
-    Mehrdeutigkeit der (a,b)-Repräsentation."""
+    """Collects all (g_+, g_-) signatures reachable through torsion translates
+    of P. This is the full information modulo the trivial ambiguity of the
+    (a,b) representation."""
     sigs = set()
     for T in TORSION:
         Q = P + T
@@ -124,8 +124,8 @@ def point_to_ab_all_sigs(P, m, n):
 
 
 def point_to_ab_canonical(P, m, n):
-    """Wählt aus allen Torsions-Translaten von P den (a,b)-Repräsentanten
-    mit minimaler naiver Höhe max(|a|, |b|). Liefert (a,b,sig) oder None."""
+    """From all torsion translates of P, pick the (a,b) representative
+    with minimal naive height max(|a|, |b|). Returns (a,b,sig) or None."""
     best = None
     best_height = None
     for T in TORSION:
@@ -190,10 +190,10 @@ random.seed(int(42))
 sample_idx = list(range(len(points)))
 random.shuffle(sample_idx)
 
-# --- Sanity-Check: führen Torsions-Translate der INPUT-Punkte aus
-# ihrer Faser heraus? Wenn ja, ist (g₊,g₋) keine Eigenschaft des Punktes
-# selbst, sondern nur einer Repräsentanten-Wahl.
-print("\n=== Sanity: kanonische Signatur (kleinste naive Höhe) der INPUT-Punkte ===")
+# --- Sanity check: do torsion translates of the INPUT points lead them
+# out of their fiber? If so, (g_+, g_-) is not a property of the point
+# itself but only of a representative choice.
+print("\n=== Sanity: canonical signature (smallest naive height) of the INPUT points ===")
 input_canonical_sigs = Counter()
 input_match_target = 0
 for P, ab in points:
@@ -204,15 +204,15 @@ for P, ab in points:
     input_canonical_sigs[sig] += 1
     if sig == (target_gp, target_gm):
         input_match_target += 1
-print(f"Kanonische Signaturen unter den {len(points)} Inputs (alle mit Original-Sig "
+print(f"Canonical signatures among the {len(points)} inputs (all with original sig "
       f"({target_gp},{target_gm})):")
 for sig, c in input_canonical_sigs.most_common(10):
-    marker = "  ←TARGET" if sig == (target_gp, target_gm) else ""
+    marker = "  <-TARGET" if sig == (target_gp, target_gm) else ""
     print(f"  {sig}: {c}{marker}")
-print(f"→ Inputs deren kanonische Wahl wieder ({target_gp},{target_gm}) ist: "
+print(f"-> Inputs whose canonical choice is again ({target_gp},{target_gm}): "
       f"{input_match_target}/{len(points)}")
 
-# --- Sum test: kanonische Signatur pro Summe ------------------------
+# --- Sum test: canonical signature per sum --------------------------
 sum_canon = Counter()
 n_tested = 0
 n_no_recovery = 0
@@ -229,10 +229,10 @@ for k in range(min(n_pairs, len(points)*(len(points)-1)//2)):
     a, b, sig = res
     sum_canon[sig] += 1
 
-print(f"\n=== Sum test ({n_tested} Paare, kanonische Signatur) ===")
-print(f"Recovery-Fehler: {n_no_recovery}")
+print(f"\n=== Sum test ({n_tested} pairs, canonical signature) ===")
+print(f"Recovery errors: {n_no_recovery}")
 for sig, c in sum_canon.most_common(20):
-    marker = "  ←TARGET" if sig == (target_gp, target_gm) else ""
+    marker = "  <-TARGET" if sig == (target_gp, target_gm) else ""
     print(f"  {sig}: {c}{marker}")
 
 # --- Difference test ------------------------------------------------
@@ -248,12 +248,12 @@ for k in range(min(n_pairs, len(points)*(len(points)-1)//2)):
     a, b, sig = res
     diff_canon[sig] += 1
 
-print(f"\n=== Difference test (kanonische Signatur) ===")
+print(f"\n=== Difference test (canonical signature) ===")
 for sig, c in diff_canon.most_common(20):
     print(f"  {sig}: {c}")
 
-# --- 2P (Verdopplung) — schließt sich (9,1) selbst ab? ---------------
-print(f"\n=== Verdopplungs-Test: 2*P_i für die ersten {min(100, len(points))} Inputs ===")
+# --- 2P (doubling) - does (9,1) close on itself? ---------------------
+print(f"\n=== Doubling test: 2*P_i for the first {min(100, len(points))} inputs ===")
 double_canon = Counter()
 for P, _ in points[:100]:
     Q = P + P

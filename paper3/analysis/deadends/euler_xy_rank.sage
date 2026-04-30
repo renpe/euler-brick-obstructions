@@ -1,24 +1,24 @@
 """
-Konstruiert für Stichprobe von (x_prim, y_prim) aus pub.master_hits die
-elliptische Kurve E_{x,y}, deren rationale Punkte den Euler-Bricks (x,y,z)
-mit gegebenem (x,y) entsprechen.
+For a sample of (x_prim, y_prim) from pub.master_hits, construct the
+elliptic curve E_{x,y} whose rational points correspond to the Euler
+bricks (x,y,z) with given (x,y).
 
-Herleitung: Aus u² = x²+z² und v² = y²+z² folgt u²-v² = x²-y², also
-(u+v)(u-v) = (x-y)(x+y). Setze α = u+v, β = u-v, β = (x²-y²)/α. Dann
-   z² · 4α² = α⁴ - 2(x²+y²)α² + (x²-y²)²
-Mit w = 2αz:
-   E_{x,y}:  w² = α⁴ − 2·(x²+y²)·α² + (x²−y²)²
+Derivation: from u^2 = x^2+z^2 and v^2 = y^2+z^2 we get u^2-v^2 = x^2-y^2,
+so (u+v)(u-v) = (x-y)(x+y). Set alpha = u+v, beta = u-v, beta = (x^2-y^2)/alpha. Then
+   z^2 * 4 alpha^2 = alpha^4 - 2(x^2+y^2) alpha^2 + (x^2-y^2)^2
+With w = 2 alpha z:
+   E_{x,y}:  w^2 = alpha^4 - 2*(x^2+y^2)*alpha^2 + (x^2-y^2)^2
 
-Genus 1 (smooth quartic) — eine elliptische Kurve, deren rationale Punkte
-genau die Euler-z's zu (x,y) parametrisieren.
+Genus 1 (smooth quartic) - an elliptic curve whose rational points
+parametrize exactly the Euler z's for (x,y).
 
-Stichprobe:
-  - Kleinste 50 (x,y) aus DB (für Speed)
-  - 38 Twin-Paare (rank ≥ 1 erwartet)
-  - 50 zufällige mittlere Größe
-Output: Rangstatistik.
+Sample:
+  - smallest 50 (x,y) from DB (for speed)
+  - 38 twin pairs (rank >= 1 expected)
+  - 50 random medium size
+Output: rank statistics.
 
-Aufruf:  sage euler_xy_rank.sage
+Usage:  sage euler_xy_rank.sage
 """
 from sage.all import *
 import psycopg
@@ -46,7 +46,7 @@ def with_timeout(seconds, fn):
 
 
 def build_E(x, y):
-    """Liefert E_{x,y} oder None bei Fehler."""
+    """Returns E_{x,y} or None on error."""
     A = x*x + y*y
     B = (x*x - y*y)**2
     R = PolynomialRing(QQ, ['s', 'w'])
@@ -67,9 +67,9 @@ def rank_info(E):
 def main():
     conn = psycopg.connect(DB)
     cur = conn.cursor()
-    print("Lade Stichprobe...")
+    print("Loading sample...")
 
-    # 1. Kleinste 50 (x_prim, y_prim) (sortiert nach max(x,y))
+    # 1. Smallest 50 (x_prim, y_prim) (sorted by max(x,y))
     cur.execute("""
         SELECT x_prim, y_prim, GREATEST(x_prim, y_prim) AS mxy
         FROM pub.master_hits
@@ -79,14 +79,14 @@ def main():
     """)
     smallest = [(int(x), int(y)) for x, y, _ in cur.fetchall()]
 
-    # 2. Twin-Paare: alle (x,y) mit ≥2 verschiedenen z's
+    # 2. Twin pairs: all (x,y) with >=2 different z's
     cur.execute("""
         SELECT x_prim, y_prim FROM pub.master_hits
         GROUP BY x_prim, y_prim HAVING COUNT(DISTINCT z_prim) > 1
     """)
     twins_xy = [(int(x), int(y)) for x, y in cur.fetchall()]
 
-    # 3. Mittlere Größe — 30 Stichproben
+    # 3. Medium size - 30 samples
     cur.execute("""
         SELECT x_prim, y_prim FROM pub.master_hits
         WHERE x_prim BETWEEN 100 AND 10000
@@ -98,10 +98,10 @@ def main():
 
     conn.close()
 
-    print(f"Stichprobe: {len(smallest)} smallest, {len(twins_xy)} twins, "
+    print(f"Sample: {len(smallest)} smallest, {len(twins_xy)} twins, "
           f"{len(medium)} medium")
 
-    # Vereinheitliche x ≤ y und dedup
+    # Canonicalize x <= y and dedup
     def norm(xy):
         x, y = xy
         return (min(x, y), max(x, y))
@@ -119,7 +119,7 @@ def main():
 
     print(f"Total dedupe: {len(samples)}\n")
 
-    # Berechne ranks
+    # Compute ranks
     rank_dist = Counter()
     twin_results = []
     print(f"{'label':<8} {'x':>10} {'y':>10} {'rk_lo':>5} {'rk_hi':>5} "
@@ -148,11 +148,11 @@ def main():
               f"{elapsed:>6.1f}")
         sys.stdout.flush()
 
-    print("\n=== Rang-Verteilung ===")
+    print("\n=== Rank distribution ===")
     for (label, r), c in sorted(rank_dist.items()):
         print(f"  {label} rank={r}: {c}")
 
-    print("\n=== Twin-Detail ===")
+    print("\n=== Twin detail ===")
     for x, y, rl, ru in twin_results:
         print(f"  ({x},{y}): rk = {rl}-{ru}")
 

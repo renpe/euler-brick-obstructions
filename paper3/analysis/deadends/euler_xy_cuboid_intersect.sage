@@ -1,12 +1,12 @@
 """
-Schnitt-Test: für eine Stichprobe (x,y) baue E_{x,y}, generiere alle Punkte
-P aus Skalar-Multiplikation der Generatoren (bis MAX_SCALAR), rekonstruiere
-das zugehörige z, und prüfe, ob x² + y² + z² ein perfektes Quadrat ist.
+Intersection test: for a sample (x,y) build E_{x,y}, generate all points
+P from scalar multiplication of generators (up to MAX_SCALAR), reconstruct
+the corresponding z, and check whether x^2 + y^2 + z^2 is a perfect square.
 
-Wenn das auf KEINEM (x,y) der Stichprobe vorkommt → starke empirische
-Bestätigung von Konjektur B auf einer dritten Kurvenfamilie.
+If this never occurs on any (x,y) of the sample -> strong empirical
+confirmation of Conjecture B on a third curve family.
 
-Aufruf:
+Usage:
     sage euler_xy_cuboid_intersect.sage [N_PAIRS] [MAX_SCALAR]
     Default: 30 5
 """
@@ -38,7 +38,7 @@ def with_timeout(seconds, fn):
 
 
 def build_E_and_quartic(x, y):
-    """Liefert (E, P_quartic, gamma) aus E_{x,y} = {w² = α⁴ − 2(x²+y²)α² + (x²−y²)²}."""
+    """Returns (E, P_quartic, gamma) from E_{x,y} = {w^2 = alpha^4 - 2(x^2+y^2) alpha^2 + (x^2-y^2)^2}."""
     Ax = x*x + y*y
     Bx = (x*x - y*y)**2
     Rt = PolynomialRing(QQ, 'T')
@@ -56,7 +56,7 @@ def main():
     conn = psycopg.connect(DB)
     cur = conn.cursor()
 
-    # Stichprobe: smallest 30 (x,y)
+    # Sample: smallest 30 (x,y)
     cur.execute("""
         SELECT x_prim, y_prim, GREATEST(x_prim, y_prim) AS mxy
         FROM pub.master_hits
@@ -67,7 +67,7 @@ def main():
     pairs = [(int(x), int(y)) for x, y, _ in cur.fetchall()]
     conn.close()
 
-    print(f"Schnitt-Test auf {len(pairs)} (x,y)-Paaren mit MAX_SCALAR={MAX_SCALAR}\n")
+    print(f"Intersection test on {len(pairs)} (x,y) pairs with MAX_SCALAR={MAX_SCALAR}\n")
 
     n_total_pts = 0
     n_cuboid_candidates = 0
@@ -109,16 +109,16 @@ def main():
                     if X_e in seen_x:
                         continue
                     seen_x.add(X_e)
-                    # Punkt auf E (Weierstraß) → α auf der Quartik (vorher
-                    # bestimmt durch ellfromeqn-Inverse). Hier nutzen wir den
-                    # Abel-Jacobi-Trick: wir suchen rationale α, so dass
-                    # P(α) = (was?). Einfacher: wir nutzen lift_x in der
-                    # Originalquartik direkt nicht — stattdessen suchen wir
-                    # alle rationalen α mit naïver Höhe ≤ Bound, die auf E
-                    # liegen. Das ist hier der Kompromiss.
+                    # Point on E (Weierstrass) -> alpha on the quartic
+                    # (previously determined by ellfromeqn inverse). Here we
+                    # use the Abel-Jacobi trick: we look for rational alpha
+                    # such that P(alpha) = (what?). Simpler: we don't use
+                    # lift_x in the original quartic directly - instead we
+                    # search for all rational alpha with naive height <= bound
+                    # that lie on E. This is the trade-off here.
                     pass
-            # Naïver Brute-Force-Schritt: enumeriere α aus kleinen Brüchen
-            # und prüfe, ob α auf E liegt + Cuboid-Bedingung.
+            # Naive brute-force step: enumerate alpha from small fractions
+            # and check whether alpha lies on E + cuboid condition.
             n_pts_brute = 0
             n_cand_brute = 0
             BOUND = 100
@@ -131,7 +131,7 @@ def main():
                     if val < 0 or not val.is_square():
                         continue
                     n_pts_brute += 1
-                    # z² = (α² + (x²-y²)²/α² - 2(x²+y²)) / 4
+                    # z^2 = (alpha^2 + (x^2-y^2)^2/alpha^2 - 2(x^2+y^2)) / 4
                     if alpha == 0:
                         continue
                     z_sq = (alpha**2 + (x*x - y*y)**2 / alpha**2 - 2*(x*x + y*y)) / 4
@@ -144,29 +144,29 @@ def main():
                     if f1.is_square():
                         n_cand_brute += 1
                         cuboid_findings.append((x, y, z, alpha))
-                        print(f"  ★★★ ({x},{y}): cuboid candidate z={z}, α={alpha}")
+                        print(f"  *** ({x},{y}): cuboid candidate z={z}, alpha={alpha}")
             n_pts = n_pts_brute
             n_cand = n_cand_brute
         elapsed = time() - t0
         n_total_pts += n_pts
         n_cuboid_candidates += n_cand
         gens_count = len(gens) if gens else 0
-        print(f"  ({x},{y}): rk≈{gens_count}, brute α-Punkte={n_pts}, "
-              f"cuboid-Kand.={n_cand}, time={elapsed:.1f}s")
+        print(f"  ({x},{y}): rk~{gens_count}, brute alpha-points={n_pts}, "
+              f"cuboid-cand.={n_cand}, time={elapsed:.1f}s")
         sys.stdout.flush()
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Geprüft: {len(pairs)} (x,y)-Paare")
-    print(f"Brute-α Punkte gesamt: {n_total_pts}")
-    print(f"Cuboid-Kandidaten: {n_cuboid_candidates}")
+    print(f"\n========== Summary ==========")
+    print(f"Checked: {len(pairs)} (x,y) pairs")
+    print(f"Brute alpha points total: {n_total_pts}")
+    print(f"Cuboid candidates: {n_cuboid_candidates}")
     if cuboid_findings:
-        print(f"\n★★★ ALARM: Cuboid-Kandidaten ★★★")
+        print(f"\n*** ALARM: cuboid candidates ***")
         for x, y, z, alpha in cuboid_findings:
-            print(f"  (x={x}, y={y}, z={z}), α={alpha}")
+            print(f"  (x={x}, y={y}, z={z}), alpha={alpha}")
             f1 = x*x + y*y + z*z
-            print(f"  → f1 = {f1} = {sqrt(f1)}²")
+            print(f"  -> f1 = {f1} = {sqrt(f1)}^2")
     else:
-        print("\nKein nicht-trivialer Cuboid-Kandidat gefunden.")
+        print("\nNo non-trivial cuboid candidate found.")
 
 
 if __name__ == "__main__":

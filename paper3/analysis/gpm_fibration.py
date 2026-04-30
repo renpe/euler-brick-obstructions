@@ -1,17 +1,17 @@
 """
-Diagnose der (g₊, g₋)-Faserung über pub.master_hits.
+Diagnostic of the (g_+, g_-) fibration over pub.master_hits.
 
-Hintergrund: Der Struktursatz besagt g₊·g₋ = g_scale. Damit liegen alle
-primitiven Ziegel (g_scale=1) in derselben Faser (1,1) — die Faserung
-trennt nur nicht-primitive Tupel. Diese Diagnose prüft, ob die Faserung
-algebraisch interessante Klassen offenlegt, insbesondere:
+Background: the structure theorem says g_+ * g_- = g_scale. Hence all
+primitive bricks (g_scale=1) lie in the same fiber (1,1) - the fibration
+only separates non-primitive tuples. This diagnostic checks whether the
+fibration reveals algebraically interesting classes, in particular:
 
-  - Wie ist die Verteilung der (g₊, g₋)-Paare?
-  - Korreliert sie mit num_blockers?
-  - Liegen die bekannten 1-Blocker-Hits (Saunderson-Kandidaten) in
-    einer charakteristischen Faser?
+  - What is the distribution of (g_+, g_-) pairs?
+  - Does it correlate with num_blockers?
+  - Do the known 1-blocker hits (Saunderson candidates) lie in
+    a characteristic fiber?
 
-Aufruf:
+Usage:
     python3 gpm_fibration.py
 """
 from __future__ import annotations
@@ -26,7 +26,7 @@ import pub_db
 
 
 def gpm(a: int, b: int, m: int, n: int) -> tuple[int, int]:
-    """Returns (g_plus, g_minus) für ein Master-Tupel."""
+    """Returns (g_plus, g_minus) for a master tuple."""
     A = a*m + b*n
     B = a*n + b*m
     C = a*m - b*n
@@ -47,7 +47,7 @@ def main():
     rows = cur.fetchall()
     print(f"Loaded {len(rows)} master hits.\n")
 
-    # --- 1. (g₊, g₋)-Verteilung + Sanity-Check g₊·g₋ == g_scale ----------
+    # --- 1. (g_+, g_-) distribution + sanity check g_+ * g_- == g_scale ----
     pair_count = Counter()
     pair_to_blockers = defaultdict(list)   # (gp, gm) -> [num_blockers, ...]
     pair_to_hit_ids = defaultdict(list)
@@ -59,10 +59,10 @@ def main():
         pair_count[(gp, gm)] += 1
         pair_to_blockers[(gp, gm)].append(nb)
         pair_to_hit_ids[(gp, gm)].append(int(hid))
-    print(f"Sanity-Check g₊·g₋ == g_scale: violations = {sanity_violations}\n")
+    print(f"Sanity check g_+ * g_- == g_scale: violations = {sanity_violations}\n")
 
-    # --- 2. Top-Fasern nach Größe ---------------------------------------
-    print("=== Top 20 (g₊, g₋)-Fasern nach Hit-Anzahl ===")
+    # --- 2. Top fibers by size ------------------------------------------
+    print("=== Top 20 (g_+, g_-) fibers by hit count ===")
     print(f"{'g_+':>6} {'g_-':>6} {'#hits':>10} {'min_b':>6} {'max_b':>6} "
           f"{'mean_b':>8} {'unfact':>7}")
     for (gp, gm), c in pair_count.most_common(20):
@@ -75,39 +75,39 @@ def main():
             mn = mx = mean = float('nan')
         print(f"{gp:>6} {gm:>6} {c:>10} {mn:>6} {mx:>6} {mean:>8.2f} {nun:>7}")
 
-    # --- 3. Saunderson-Lokalisierung: 1-Blocker-Hits --------------------
-    print("\n=== Saunderson-Lokalisierung (num_blockers = 1) ===")
+    # --- 3. Saunderson localization: 1-blocker hits ---------------------
+    print("\n=== Saunderson localization (num_blockers = 1) ===")
     saunderson_pairs = Counter()
     for (gp, gm), bs in pair_to_blockers.items():
         n1 = sum(1 for b in bs if b == 1)
         if n1 > 0:
             saunderson_pairs[(gp, gm)] = n1
-    print(f"Insgesamt {sum(saunderson_pairs.values())} 1-Blocker-Hits "
-          f"in {len(saunderson_pairs)} verschiedenen Fasern.\n")
+    print(f"In total {sum(saunderson_pairs.values())} 1-blocker hits "
+          f"in {len(saunderson_pairs)} different fibers.\n")
     print(f"{'g_+':>6} {'g_-':>6} {'#1-blocker':>11}")
     for (gp, gm), n in saunderson_pairs.most_common(20):
         print(f"{gp:>6} {gm:>6} {n:>11}")
 
-    # --- 4. Primitive vs. nicht-primitive ------------------------------
+    # --- 4. Primitive vs. non-primitive --------------------------------
     n_prim = pair_count[(1, 1)]
     n_nonprim = sum(c for k, c in pair_count.items() if k != (1, 1))
-    print(f"\nPrimitiv (g_+, g_-) = (1,1):   {n_prim:>10}")
-    print(f"Nicht-primitiv:              {n_nonprim:>10}")
-    print(f"Anzahl verschiedener Fasern: {len(pair_count):>10}")
+    print(f"\nPrimitive (g_+, g_-) = (1,1):   {n_prim:>10}")
+    print(f"Non-primitive:               {n_nonprim:>10}")
+    print(f"Number of distinct fibers:   {len(pair_count):>10}")
 
-    # --- 5. Blocker-Verteilung pro „Klasse" ----------------------------
-    # Klasse 1: (1,1) primitiv
-    # Klasse 2: (k,1) — Saunderson-Kandidat (g₊ skaliert, g₋ = 1)
-    # Klasse 3: (1,k) — duale Saunderson-Kandidat
-    # Klasse 4: beide >1
-    print("\n=== Blocker-Verteilung pro Faser-Klasse ===")
+    # --- 5. Blocker distribution per "class" ---------------------------
+    # Class 1: (1,1) primitive
+    # Class 2: (k,1) - Saunderson candidate (g_+ scaled, g_- = 1)
+    # Class 3: (1,k) - dual Saunderson candidate
+    # Class 4: both >1
+    print("\n=== Blocker distribution per fiber class ===")
     classes = {
-        "(1,1) primitiv":      lambda gp, gm: gp == 1 and gm == 1,
-        "(k,1) k>1 'Saund⁺'":  lambda gp, gm: gp > 1 and gm == 1,
-        "(1,k) k>1 'Saund⁻'":  lambda gp, gm: gp == 1 and gm > 1,
-        "beide >1":            lambda gp, gm: gp > 1 and gm > 1,
+        "(1,1) primitive":     lambda gp, gm: gp == 1 and gm == 1,
+        "(k,1) k>1 'Saund+'":  lambda gp, gm: gp > 1 and gm == 1,
+        "(1,k) k>1 'Saund-'":  lambda gp, gm: gp == 1 and gm > 1,
+        "both >1":             lambda gp, gm: gp > 1 and gm > 1,
     }
-    print(f"{'Klasse':<24} {'#hits':>8} {'min_b':>6} {'max_b':>6} "
+    print(f"{'class':<24} {'#hits':>8} {'min_b':>6} {'max_b':>6} "
           f"{'#1-block':>9} {'unfact':>7}")
     for label, pred in classes.items():
         bs = []

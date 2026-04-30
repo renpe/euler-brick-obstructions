@@ -1,21 +1,21 @@
 """
-Vollständige Rang-Bestimmung von J(H_{m,n}) durch Zerlegung in 3 elliptische
-Faktoren.
+Full rank determination of J(H_{m,n}) by decomposition into 3 elliptic
+factors.
 
-H_{m,n}: v² = P(t²)·Q(t²) hat Automorphismen:
-  σ₁: t → −t  (gerade Quartik in t)
-  σ₂: t → 1/t (P, Q sind Palindrome in t)
+H_{m,n}: v^2 = P(t^2) * Q(t^2) has automorphisms:
+  sigma_1: t -> -t  (even quartic in t)
+  sigma_2: t -> 1/t (P, Q are palindromes in t)
 
-Quotienten:
-  E_PQ via s=t²:        Y² = P(s)·Q(s)                     (Grad 4 in s)
-  E_uV via u=t+1/t:     V² = (V₂²u² + 4(U₂²−V₂²)) · (W₂²u² − 4V₂²)
-  E_3   via Komposition σ₁σ₂: t → −1/t
+Quotients:
+  E_PQ via s=t^2:        Y^2 = P(s) * Q(s)                     (degree 4 in s)
+  E_uV via u=t+1/t:      V^2 = (V2^2 u^2 + 4(U2^2 - V2^2)) * (W2^2 u^2 - 4 V2^2)
+  E_3   via composition sigma_1 sigma_2: t -> -1/t
 
-J(H) ~ E_PQ × E_uV × E_3
+J(H) ~ E_PQ x E_uV x E_3
 
-Wir berechnen rk aller drei via PARI ellrank, summieren.
+We compute rk of all three via PARI ellrank, sum.
 
-Aufruf: sage jh_full_decomp.sage [M_MAX]
+Usage: sage jh_full_decomp.sage [M_MAX]
 """
 from sage.all import *
 import sys
@@ -79,26 +79,26 @@ def main():
             V2 = 2*m*n
             W2 = m*m + n*n
 
-            # Faktor 1: E_PQ : Y² = P(s)Q(s) (Quartik in s)
+            # Factor 1: E_PQ : Y^2 = P(s)Q(s) (quartic in s)
             Rs = PolynomialRing(QQ, 'S')
             S = Rs.gen()
             P_s = V2**2 * S**2 + (4*U2**2 - 2*V2**2) * S + V2**2
             Q_s = W2**2 * S**2 + 2*(U2**2 - V2**2) * S + W2**2
-            PQ = P_s * Q_s   # Grad 4 in s
+            PQ = P_s * Q_s   # degree 4 in s
 
-            # Faktor 2: E_uV : V² = (V₂²u² + 4(U₂²−V₂²)) · (W₂²u² − 4V₂²)
+            # Factor 2: E_uV : V^2 = (V2^2 u^2 + 4(U2^2 - V2^2)) * (W2^2 u^2 - 4 V2^2)
             Ru = PolynomialRing(QQ, 'U')
             U = Ru.gen()
             uV_quartic = (V2**2 * U**2 + 4*(U2**2 - V2**2)) * (W2**2 * U**2 - 4*V2**2)
 
-            # Faktor 3: aus σ₁σ₂ (t → −1/t). Setzen wir w = t − 1/t,
-            # dann t² + 1/t² = w² + 2, t⁴ + 1 = t²·(t² + 1/t²) = t²·(w²+2).
-            # P(t²)/t² = V₂²(t² + 1/t²) + (4U₂² − 2V₂²) = V₂²(w² + 2) + 4U₂² − 2V₂²
-            #          = V₂²w² + 4U₂²
-            # Q(t²)/t² = W₂²(w² + 2) + 2(U₂² − V₂²) = W₂²w² + 2(U₂² − V₂² + W₂²)
-            #          = W₂²w² + 2(2U₂²) = W₂²w² + 4U₂²
-            # Also: P(t²)Q(t²)/t⁴ = (V₂²w² + 4U₂²)(W₂²w² + 4U₂²)
-            # E_3 : Y² = (V₂²w² + 4U₂²)(W₂²w² + 4U₂²)
+            # Factor 3: from sigma_1 sigma_2 (t -> -1/t). Setting w = t - 1/t,
+            # then t^2 + 1/t^2 = w^2 + 2, t^4 + 1 = t^2 * (t^2 + 1/t^2) = t^2 * (w^2+2).
+            # P(t^2)/t^2 = V2^2 (t^2 + 1/t^2) + (4 U2^2 - 2 V2^2) = V2^2 (w^2 + 2) + 4 U2^2 - 2 V2^2
+            #            = V2^2 w^2 + 4 U2^2
+            # Q(t^2)/t^2 = W2^2 (w^2 + 2) + 2 (U2^2 - V2^2) = W2^2 w^2 + 2 (U2^2 - V2^2 + W2^2)
+            #            = W2^2 w^2 + 2 (2 U2^2) = W2^2 w^2 + 4 U2^2
+            # So: P(t^2) Q(t^2) / t^4 = (V2^2 w^2 + 4 U2^2) (W2^2 w^2 + 4 U2^2)
+            # E_3 : Y^2 = (V2^2 w^2 + 4 U2^2) (W2^2 w^2 + 4 U2^2)
             Rw = PolynomialRing(QQ, 'W')
             W = Rw.gen()
             third_quartic = (V2**2 * W**2 + 4*U2**2) * (W2**2 * W**2 + 4*U2**2)
@@ -115,13 +115,13 @@ def main():
             rk_uV = safe_rank(E_uV)
             rk_3  = safe_rank(E_3)
 
-            # Summe-Bound
+            # Sum bound
             if all(r[0] is not None for r in [rk_PQ, rk_uV, rk_3]):
                 lo = rk_PQ[0] + rk_uV[0] + rk_3[0]
                 hi = rk_PQ[1] + rk_uV[1] + rk_3[1]
                 jh_str = f"{lo}-{hi}" if lo != hi else str(lo)
                 # Chabauty: rk(J) < genus(H) = 3
-                chab = "✓" if hi < 3 else "✗"
+                chab = "yes" if hi < 3 else "no"
                 if hi < 3:
                     chab_count += 1
             else:
@@ -132,9 +132,9 @@ def main():
                   f"{jh_str:>8} {'3':>2} {chab:>5}")
             sys.stdout.flush()
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Gesamt geprüfte Fasern: {n_total}")
-    print(f"Chabauty anwendbar (rk(J)<3): {chab_count} → Konjektur B explizit beweisbar")
+    print(f"\n========== Summary ==========")
+    print(f"Total fibers checked: {n_total}")
+    print(f"Chabauty applicable (rk(J)<3): {chab_count} -> Conjecture B explicitly provable")
 
 
 if __name__ == "__main__":

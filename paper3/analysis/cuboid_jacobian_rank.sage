@@ -1,17 +1,17 @@
 """
-Versuch, den Rang von J(H_{m,n}) für Stichprobe (m,n) zu schätzen.
+Attempt to estimate the rank of J(H_{m,n}) for a sample (m,n).
 
-Strategie:
-  - H ist Genus 3, daher J(H) hat dim 3.
-  - H → E_PQ via s = t² (Genus-1-Quotient): Y² = P(s)·Q(s).
-  - Damit ist E_PQ ein Faktor: rk(E_PQ) ≤ rk(J(H)).
-  - Wir kennen bereits rk(E_{m,n}), rk(E'_{m,n}), rk(E_PQ).
-  - Falls die alle bekannt und summe < 3 → Chabauty ggf. anwendbar.
+Strategy:
+  - H is genus 3, hence J(H) has dim 3.
+  - H -> E_PQ via s = t^2 (genus-1 quotient): Y^2 = P(s)*Q(s).
+  - So E_PQ is a factor: rk(E_PQ) <= rk(J(H)).
+  - We already know rk(E_{m,n}), rk(E'_{m,n}), rk(E_PQ).
+  - If they are all known and sum < 3 -> Chabauty potentially applicable.
 
-Hinweis: J(H) zerlegt sich nicht unbedingt vollständig in elliptische
-Faktoren. Es gibt einen Prym-Anteil von Dim 2.
+Note: J(H) does not necessarily decompose completely into elliptic
+factors. There is a Prym component of dim 2.
 
-Aufruf: sage cuboid_jacobian_rank.sage [M_MAX]
+Usage: sage cuboid_jacobian_rank.sage [M_MAX]
 """
 from sage.all import *
 import sys
@@ -71,17 +71,17 @@ def main():
             P_t = V2**2 * T**4 + (4*U2**2 - 2*V2**2) * T**2 + V2**2
             Q_t = W2**2 * T**4 + 2*(U2**2 - V2**2) * T**2 + W2**2
 
-            # E_PQ via s=t²: P(s)*Q(s) als Quartik in s
+            # E_PQ via s=t^2: P(s)*Q(s) as quartic in s
             Rs = PolynomialRing(QQ, 'S')
             S = Rs.gen()
             P_s = V2**2 * S**2 + (4*U2**2 - 2*V2**2) * S + V2**2
             Q_s = W2**2 * S**2 + 2*(U2**2 - V2**2) * S + W2**2
-            PQ = P_s * Q_s   # Grad 4 in s
+            PQ = P_s * Q_s   # degree 4 in s
 
             try:
                 E   = quartic_to_E(P_t)
                 Ep  = quartic_to_E(Q_t)
-                Epq = quartic_to_E(PQ)  # Genus-1-Quotient
+                Epq = quartic_to_E(PQ)  # genus-1 quotient
             except Exception as ex:
                 print(f"{f'({m},{n})':>10}  fail: {ex}")
                 continue
@@ -95,15 +95,15 @@ def main():
                 if rk[0] == rk[1]: return f"{rk[0]}"
                 return f"{rk[0]}-{rk[1]}"
 
-            # Untere Schranke für rk(J(H)): mindestens rk(E_PQ).
-            # Aber WICHTIG: rk(E) und rk(E') kommen aus der Volle C, nicht aus H.
-            # Wir vermerken sie nur informativ.
+            # Lower bound for rk(J(H)): at least rk(E_PQ).
+            # But IMPORTANT: rk(E) and rk(E') come from full C, not from H.
+            # We only note them informatively.
             lb = fmt(rPQ)
             print(f"{f'({m},{n})':>10} {fmt(rE):>5} {fmt(rEp):>6} {fmt(rPQ):>7} {lb:>15} {elapsed:>6.1f}")
             sys.stdout.flush()
             rank_dist.append((m, n, rE, rEp, rPQ))
 
-    print(f"\n========== Verteilung von rk(E_PQ) ==========")
+    print(f"\n========== Distribution of rk(E_PQ) ==========")
     from collections import Counter
     counts = Counter()
     for _, _, _, _, rPQ in rank_dist:
@@ -112,7 +112,7 @@ def main():
         else:
             counts['?'] += 1
     for r in sorted(counts.keys(), key=lambda x: (isinstance(x, str), x)):
-        print(f"  rk(E_PQ) = {r}: {counts[r]} Fasern")
+        print(f"  rk(E_PQ) = {r}: {counts[r]} fibers")
 
 
 if __name__ == "__main__":

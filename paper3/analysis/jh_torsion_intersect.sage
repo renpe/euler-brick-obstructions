@@ -1,22 +1,22 @@
 """
-Rigoroser Beweis von H_{m,n}(Q) = {6 trivialen Punkten} via Torsion eines
-elliptischen Quotienten von rang 0.
+Rigorous proof of H_{m,n}(Q) = {6 trivial points} via torsion of an
+elliptic quotient of rank 0.
 
-Schlüssel: J(H) ~ E_PQ × E_uV × E_3. Falls einer dieser Faktoren rk = 0 hat,
-ist sein Q-Punkt-Set endlich (nur Torsion). Die Abbildung H → E_q hat Bild
-darin, also ist H(Q) rigoros endlich.
+Key: J(H) ~ E_PQ x E_uV x E_3. If one of these factors has rk = 0,
+its set of Q-points is finite (only torsion). The map H -> E_q has image
+in there, so H(Q) is rigorously finite.
 
-Wir nutzen:
-  - σ₁: t → −t  → quotient E_PQ in (s=t², Y=y)
-  - σ₂: t → 1/t → quotient E_uV in (u=t+1/t, V=y/t²)
-  - σ₁σ₂: t → −1/t → quotient E_3 in (w=t−1/t, V=y/t²)
+We use:
+  - sigma_1: t -> -t   -> quotient E_PQ in (s=t^2, Y=y)
+  - sigma_2: t -> 1/t  -> quotient E_uV in (u=t+1/t, V=y/t^2)
+  - sigma_1 sigma_2: t -> -1/t -> quotient E_3 in (w=t-1/t, V=y/t^2)
 
-Algorithmus für rk(E_q) = 0:
-  1. Berechne torsion(E_q) via Sage.
-  2. Für jeden Torsionspunkt (q₀, V₀): rückwärts zu rationalem t.
-  3. Prüfe y² = f(t) rational.
+Algorithm for rk(E_q) = 0:
+  1. Compute torsion(E_q) via Sage.
+  2. For each torsion point (q_0, V_0): backwards to rational t.
+  3. Check y^2 = f(t) rational.
 
-Resultat: rigoros vollständige Liste H(Q).
+Result: rigorously complete list H(Q).
 """
 from sage.all import *
 import sys
@@ -27,7 +27,7 @@ from time import time
 pari.allocatemem(int(2e9))
 
 CHABAUTY_FIBERS_BY_RANK = [
-    # (m, n, rk(E_uV), rk(E_3)) — verwende Quotient mit rk=0
+    # (m, n, rk(E_uV), rk(E_3)) - use quotient with rk=0
     (2, 1,  0, 0),
     (3, 2,  0, 0),
     (4, 1,  1, 0),
@@ -64,8 +64,8 @@ def quartic_to_E(P_quartic):
 
 
 def find_t_from_w_minus(w0, sigma):
-    """Rückwärts vom σ_1σ_2-Quotienten (w = t - 1/t) zu rationalem t.
-    sigma=+1: w0 = t - 1/t, also t² - w0·t - 1 = 0, disc = w0² + 4."""
+    """Backwards from the sigma_1 sigma_2 quotient (w = t - 1/t) to rational t.
+    sigma=+1: w0 = t - 1/t, hence t^2 - w0*t - 1 = 0, disc = w0^2 + 4."""
     disc = w0**2 + 4 if sigma == +1 else w0**2 - 4
     if disc < 0:
         return []
@@ -92,9 +92,9 @@ def main():
         Q_t = W2**2 * T**4 + 2*(U2**2 - V2**2) * T**2 + W2**2
         f = P_t * Q_t
 
-        # Wähle den Quotienten mit Rang 0
-        # E_3 (σ₁σ₂, w = t - 1/t): hat Polynomi (V₂²w² + 4U₂²)(W₂²w² + 4U₂²)
-        # E_uV (σ₂, u = t + 1/t): hat Polynom (V₂²u² + 4(U₂²-V₂²))(W₂²u² - 4V₂²)
+        # Choose the quotient with rank 0
+        # E_3 (sigma_1 sigma_2, w = t - 1/t): has polynomial (V2^2 w^2 + 4 U2^2)(W2^2 w^2 + 4 U2^2)
+        # E_uV (sigma_2, u = t + 1/t): has polynomial (V2^2 u^2 + 4(U2^2-V2^2))(W2^2 u^2 - 4 V2^2)
 
         if rk_3 == 0:
             use = "E_3"
@@ -104,7 +104,7 @@ def main():
             quartic = (V2**2 * W**2 + 4*U2**2) * (W2**2 * W**2 + 4*U2**2)
         elif rk_uV == 0:
             use = "E_uV"
-            sigma = -1  # u = t + 1/t, t² - u·t + 1 = 0, disc = u² - 4
+            sigma = -1  # u = t + 1/t, t^2 - u*t + 1 = 0, disc = u^2 - 4
             Ru = PolynomialRing(QQ, 'U')
             U = Ru.gen()
             quartic = (V2**2 * U**2 + 4*(U2**2 - V2**2)) * (W2**2 * U**2 - 4*V2**2)
@@ -119,19 +119,19 @@ def main():
             print(f"{f'({m},{n})':>10}  fail: {ex}")
             continue
 
-        # Sammle alle rationalen t-Werte aus Torsionspunkten
-        # Wir brauchen die WeierstraSS->Quartik Rückabbildung. Das ist tricky;
-        # einfacher: enumeriere rationale Werte des Quotient-Parameters direkt
-        # via brute force aus E.gens() oder über andere Mittel.
-        # Da Torsion aber in Sage als Punkte auf der Weierstraß-Kurve gegeben ist,
-        # müssen wir die Inverse zur Quartik haben.
-        # Einfacher Ansatz: rationale Punkte (q₀, V₀) auf der Quartik direkt
-        # finden. Da rk = 0, sind das nur die Torsionspunkte und sie haben
-        # kleine Höhe.
+        # Collect all rational t-values from torsion points
+        # We need the Weierstrass -> quartic backward map. That is tricky;
+        # easier: enumerate rational values of the quotient parameter directly
+        # via brute force from E.gens() or by other means.
+        # Since torsion is given in Sage as points on the Weierstrass curve,
+        # we need the inverse to the quartic.
+        # Simpler approach: find rational points (q_0, V_0) on the quartic
+        # directly. Since rk = 0, these are only the torsion points and they
+        # have small height.
 
         from sage.all import isqrt
-        # Brute-force rationale q₀ mit |num|, |den| ≤ N und prüfe ob
-        # quartic(q₀) ein Quadrat ist.
+        # Brute-force rational q_0 with |num|, |den| <= N and check whether
+        # quartic(q_0) is a square.
         candidates = []
         BOUND = 100
         Q_var = quartic.parent().gen()
@@ -147,12 +147,12 @@ def main():
                     candidates.append((q0, val.sqrt()))
                     candidates.append((q0, -val.sqrt()))
 
-        # Für jeden Kandidat (q₀, V₀): rückwärts zu t
+        # For each candidate (q_0, V_0): backwards to t
         h_pts = set()
         for q0, V0 in candidates:
             ts = find_t_from_w_minus(q0, sigma)
             for t in ts:
-                # y² = f(t)
+                # y^2 = f(t)
                 y_sq = f.subs({T: t})
                 if y_sq < 0:
                     continue
@@ -160,21 +160,21 @@ def main():
                     y = y_sq.sqrt()
                     h_pts.add((t, y))
                     h_pts.add((t, -y))
-        # Plus: t = 0 ist Sonderfall (kein endliches w-Bild)
+        # Plus: t = 0 is special case (no finite w-image)
         if (f.subs({T: QQ(0)})).is_square():
             y0_sq = f.subs({T: QQ(0)})
             y0 = y0_sq.sqrt()
             h_pts.add((QQ(0), y0))
             h_pts.add((QQ(0), -y0))
 
-        # Triviale: t ∈ {0, 1, -1}
+        # Trivial: t in {0, 1, -1}
         trivial = {(QQ(0), QQ(20)), (QQ(0), QQ(-20))} if False else set()  # depends
         n_pts = len(h_pts)
-        # Plus 2 Unendlichkeits-Punkte (Leading-Coef = (V₂W₂)² ist Quadrat)
+        # Plus 2 points at infinity (leading coef = (V2 W2)^2 is square)
         n_inf = 2
-        # Nicht-triviale: t nicht in {0, 1, -1}
+        # Non-trivial: t not in {0, 1, -1}
         nontrivial = [(t, y) for (t, y) in h_pts if t not in (QQ(0), QQ(1), QQ(-1))]
-        extra_str = "—" if not nontrivial else f"NON-TRIVIAL: {nontrivial[:3]}..."
+        extra_str = "-" if not nontrivial else f"NON-TRIVIAL: {nontrivial[:3]}..."
         print(f"{f'({m},{n})':>10} {use:>5} {len(tors):>7} {n_pts + n_inf:>7} {extra_str:>20}")
 
 

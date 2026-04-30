@@ -1,17 +1,17 @@
 """
-Verfeinerter Torsions-Trick für die 61 unsicheren Fasern.
+Refined torsion trick for the 61 uncertain fibers.
 
-Beobachtung: |H(Q)| ≤ 2·|E_3(Q)_tors| ist die naive Bound. Wenn |tors| > 4,
-ist die Bound > 8, aber empirisch ist |H(Q)| = 8.
+Observation: |H(Q)| <= 2 * |E_3(Q)_tors| is the naive bound. If |tors| > 4,
+the bound is > 8, but empirically |H(Q)| = 8.
 
-Verfeinerung: für jeden Torsionspunkt (w₀, V₀) ∈ E_3(Q) prüfen wir, ob
-t² − w₀·t − 1 = 0 RATIONALE Lösungen hat (Diskriminante w₀² + 4 muss
-Quadrat sein). Nur diese Torsionspunkte liefern rationale H-Punkte.
+Refinement: for each torsion point (w_0, V_0) in E_3(Q) we check whether
+t^2 - w_0*t - 1 = 0 has RATIONAL solutions (discriminant w_0^2 + 4 must
+be a square). Only these torsion points yield rational H-points.
 
-Wenn nur 4 der Torsionspunkte rationale Preimages liefern, ist |H(Q)| = 8
-rigoros (nicht nur ≤ 2|tors|).
+If only 4 of the torsion points yield rational preimages, then |H(Q)| = 8
+rigorously (not only <= 2|tors|).
 
-Wir lösen dies für alle Fasern bis M_MAX, nicht nur die mit |tors|=4.
+We solve this for all fibers up to M_MAX, not only those with |tors|=4.
 """
 from sage.all import *
 import sys
@@ -37,14 +37,14 @@ def with_timeout(seconds, fn):
 
 
 def quartic_to_E_with_inverse(P_quartic):
-    """Liefert E (Weierstraß) zusammen mit der Inverse-Map: Punkt auf E → Punkt
-    auf Quartik (w, V) — wenn überhaupt rational existiert.
+    """Returns E (Weierstrass) together with the inverse map: point on E -> point
+    on quartic (w, V) - if rational at all.
 
-    Die ellfromeqn-Transformation ist relativ Standard. Wir nutzen:
-       Quartik: V² = a₄·w⁴ + a₃·w³ + a₂·w² + a₁·w + a₀
-    Im Quartik gibt's potenziell endlich viele rationale Punkte. Wir
-    enumerieren sie über kleine Zähler/Nenner für Brute-Force, plus
-    explizite Inverse von ellfromeqn falls Sage liefert.
+    The ellfromeqn transformation is relatively standard. We use:
+       Quartic: V^2 = a_4 * w^4 + a_3 * w^3 + a_2 * w^2 + a_1 * w + a_0
+    On the quartic there are potentially finitely many rational points. We
+    enumerate them via small numerator/denominator for brute force, plus
+    explicit inverse from ellfromeqn if Sage provides one.
     """
     R = PolynomialRing(QQ, ['s', 'w'])
     s, w = R.gens()
@@ -55,8 +55,8 @@ def quartic_to_E_with_inverse(P_quartic):
 
 
 def quartic_rational_points(P_quartic, BOUND=200):
-    """Brute-force-Enumeration aller rationalen Punkte (w, V) auf der Quartik
-    V² = P_quartic(w) mit max(|num|,|den|) ≤ BOUND."""
+    """Brute-force enumeration of all rational points (w, V) on the quartic
+    V^2 = P_quartic(w) with max(|num|,|den|) <= BOUND."""
     pts = set()
     Q_var = P_quartic.parent().gen()
     for num in range(-BOUND, BOUND + 1):
@@ -75,8 +75,8 @@ def quartic_rational_points(P_quartic, BOUND=200):
 
 
 def find_t_with_disc(w0, sigma):
-    """Für σ_1σ_2 (sigma=+1, w = t-1/t): t² - w·t - 1 = 0, disc = w²+4.
-       Für σ_2 (sigma=-1, u = t+1/t): t² - u·t + 1 = 0, disc = u²-4."""
+    """For sigma_1 sigma_2 (sigma=+1, w = t-1/t): t^2 - w*t - 1 = 0, disc = w^2+4.
+       For sigma_2 (sigma=-1, u = t+1/t): t^2 - u*t + 1 = 0, disc = u^2-4."""
     if sigma == +1:
         disc = w0**2 + 4
     else:
@@ -98,7 +98,7 @@ def safe_rank_lo(E):
 
 
 def main():
-    print(f"Verfeinerter Torsions-Trick auf (m,n) bis M_MAX={M_MAX}\n")
+    print(f"Refined torsion trick on (m,n) up to M_MAX={M_MAX}\n")
     print(f"{'(m,n)':>10} {'rk_uV':>6} {'rk_3':>5} {'method':>7} "
           f"{'|tors|':>7} {'#preim':>7} {'|H(Q)|':>7} {'OK?':>4}")
 
@@ -118,11 +118,11 @@ def main():
             V2 = 2*m*n
             W2 = m*m + n*n
 
-            # E_uV: σ₂-Quotient
+            # E_uV: sigma_2 quotient
             Ru = PolynomialRing(QQ, 'U')
             U = Ru.gen()
             quartic_uV = (V2**2 * U**2 + 4*(U2**2 - V2**2)) * (W2**2 * U**2 - 4*V2**2)
-            # E_3: σ₁σ₂-Quotient
+            # E_3: sigma_1 sigma_2 quotient
             Rw = PolynomialRing(QQ, 'W')
             W = Rw.gen()
             quartic_3 = (V2**2 * W**2 + 4*U2**2) * (W2**2 * W**2 + 4*U2**2)
@@ -137,7 +137,7 @@ def main():
             rk_uV = safe_rank_lo(E_uV)
             rk_3 = safe_rank_lo(E_3)
 
-            # Wähle den rk=0-Quotienten
+            # Pick the rk=0 quotient
             if rk_3 == (0, 0):
                 method = "E_3"
                 sigma = +1  # w = t - 1/t
@@ -149,13 +149,13 @@ def main():
                 quartic = quartic_uV
                 E = E_uV
             else:
-                # Kein rk=0-Quotient
+                # No rk=0 quotient
                 print(f"{f'({m},{n})':>10} {rk_uV[0] if rk_uV[0] is not None else '?':>6} "
                       f"{rk_3[0] if rk_3[0] is not None else '?':>5} "
-                      f"{'—':>7} {'—':>7} {'—':>7} {'—':>7} {'—':>4}")
+                      f"{'-':>7} {'-':>7} {'-':>7} {'-':>7} {'-':>4}")
                 continue
 
-            # Hole alle rationalen Punkte auf Quartik
+            # Get all rational points on quartic
             try:
                 pts = quartic_rational_points(quartic, BOUND=200)
                 tors_size = len(pts)
@@ -163,19 +163,19 @@ def main():
                 n_fail_tors += 1
                 continue
 
-            # Für jeden Punkt: prüfe rationale Preimages auf H
-            n_preim_pts = 0  # Anzahl Torsionspunkte mit rat. Preimage
-            n_h_pts = 0       # Anzahl resultierender H-Punkte
+            # For each point: check rational preimages on H
+            n_preim_pts = 0  # number of torsion points with rat. preimage
+            n_h_pts = 0       # number of resulting H-points
             for (w0, V0) in pts:
                 ts = find_t_with_disc(w0, sigma)
-                # Prüfe ob es überhaupt rationale Preimages gibt
+                # Check whether there are any rational preimages at all
                 if ts:
                     n_preim_pts += 1
-                    # Plus die +/-V0-Symmetrie auf H: für jeden t gibt es y = ±sqrt(f(t))
+                    # Plus the +/-V0 symmetry on H: for each t there is y = +-sqrt(f(t))
                     Rt = PolynomialRing(QQ, 'T')
                     T_var = Rt.gen()
                     f = quartic.parent()  # actually we need the H-polynomial
-                    # f_H(t) = P(t²)·Q(t²)
+                    # f_H(t) = P(t^2) * Q(t^2)
                     P_t = V2**2 * T_var**4 + (4*U2**2 - 2*V2**2) * T_var**2 + V2**2
                     Q_t = W2**2 * T_var**4 + 2*(U2**2 - V2**2) * T_var**2 + W2**2
                     f_H = P_t * Q_t
@@ -184,32 +184,32 @@ def main():
                         if f_t < 0:
                             continue
                         if f_t.is_square():
-                            n_h_pts += 1  # für +y
-                            n_h_pts += 1  # für -y
+                            n_h_pts += 1  # for +y
+                            n_h_pts += 1  # for -y
 
-            # Plus 2 Punkte im Unendlichen (Leading coef = (V₂W₂)² ist Quadrat)
+            # Plus 2 points at infinity (leading coef = (V2 W2)^2 is square)
             n_h_pts += 2
 
-            # Korrektur: doppelte Zählung möglich. Vereinfacht: prüfe ob == 8.
+            # Correction: double counting possible. Simplified: check whether == 8.
             if n_h_pts == 8:
-                ok = "✓"
+                ok = "yes"
                 n_proven += 1
                 proven_fibers.append((m, n, method, tors_size, n_preim_pts))
             elif n_h_pts > 8:
-                ok = "?"  # mehr Punkte gefunden = Cuboid?? Bug?
+                ok = "?"  # more points found = cuboid?? bug?
             else:
-                ok = "−"  # weniger als 8?
+                ok = "-"  # less than 8?
 
             print(f"{f'({m},{n})':>10} {rk_uV[0] if rk_uV[0] is not None else '?':>6} "
                   f"{rk_3[0] if rk_3[0] is not None else '?':>5} {method:>7} "
                   f"{tors_size:>7} {n_preim_pts:>7} {n_h_pts:>7} {ok:>4}")
             sys.stdout.flush()
 
-    print(f"\n========== ZUSAMMENFASSUNG ==========")
-    print(f"Gesamt geprüfte Fasern: {n_total}")
-    print(f"Konjektur B RIGOROS BEWIESEN: {n_proven}")
-    print(f"Fehler im Rang-Bestimmen: {n_fail_rank}")
-    print(f"Fehler im Torsions-Bestimmen: {n_fail_tors}")
+    print(f"\n========== SUMMARY ==========")
+    print(f"Total fibers checked: {n_total}")
+    print(f"Conjecture B RIGOROUSLY PROVED: {n_proven}")
+    print(f"Errors in rank determination: {n_fail_rank}")
+    print(f"Errors in torsion determination: {n_fail_tors}")
 
 
 if __name__ == "__main__":

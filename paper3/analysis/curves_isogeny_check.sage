@@ -1,12 +1,12 @@
 """
-Strukturtest: für eine Stichprobe Master-Tupel die fünf elliptischen Kurven
+Structure test: for a sample of master tuples, build the five elliptic curves
    E_{m,n}, E'_{m,n}, E_{X,Y}, E_{X,Z}, E_{Y,Z}
-bauen und prüfen, ob sie isogen sind (j-Invariante, Conductor, Isogenie-Klasse).
+and check whether they are isogenous (j-invariant, conductor, isogeny class).
 
-Hypothese: wenn z.B. E_{X,Y} und E_{m,n} immer isogen sind, ist die
-„dritte Kurve" nur eine Travestie der Master-Faserung — kein neuer Hebel.
+Hypothesis: if e.g. E_{X,Y} and E_{m,n} are always isogenous, then the
+"third curve" is just a travesty of the master fibration - no new lever.
 
-Aufruf:
+Usage:
     sage curves_isogeny_check.sage [N_SAMPLES]
     Default: 10
 """
@@ -33,7 +33,7 @@ def with_timeout(seconds, fn):
 
 
 def quartic_to_E(P_quartic, var_pair=('s', 'w')):
-    """Konvertiert y² = P(T) (Quartik) in EllipticCurve."""
+    """Convert y^2 = P(T) (quartic) to EllipticCurve."""
     R = PolynomialRing(QQ, list(var_pair))
     s, w = R.gens()
     T = P_quartic.parent().gen()
@@ -95,7 +95,7 @@ def isogeny_class(E):
 def main():
     conn = psycopg.connect(DB)
     cur = conn.cursor()
-    print(f"Lade {N} kleinste Master-Tupel...")
+    print(f"Loading {N} smallest master tuples...")
     cur.execute("""
         SELECT a, b, m, n, x, y, z
         FROM pub.master_hits
@@ -104,7 +104,7 @@ def main():
     """, (N,))
     rows = cur.fetchall()
     conn.close()
-    print(f"Geladen: {len(rows)}\n")
+    print(f"Loaded: {len(rows)}\n")
 
     n_jXY_eq_jE = 0
     n_jXZ_eq_jE = 0
@@ -142,8 +142,8 @@ def main():
         if jXZ == jEp: n_jXZ_eq_jEp += 1; flags.append("XZ=E'")
         if jYZ == jEp: n_jYZ_eq_jEp += 1; flags.append("YZ=E'")
 
-        # Isogenie-Test (j-Vergleich nur die feste Kurve, isogeny_class
-        # gibt alle Klassengenossen)
+        # Isogeny test (j-comparison only on the fixed curve, isogeny_class
+        # gives all class members)
         try:
             iso_E = with_timeout(TIMEOUT, lambda: set(EE.j_invariant() for EE in E.isogeny_class()))
         except Exception:
@@ -156,7 +156,7 @@ def main():
                     if label != "E'":
                         n_some_isog += 1
 
-        print(f"  ({a},{b},{m},{n}) → ({x},{y},{z})  flags={flags}")
+        print(f"  ({a},{b},{m},{n}) -> ({x},{y},{z})  flags={flags}")
         print(f"     j(E)={jE}")
         print(f"     j(E')={jEp}")
         print(f"     j(E_XY)={jXY}")
@@ -164,15 +164,15 @@ def main():
         print(f"     j(E_YZ)={jYZ}")
         sys.stdout.flush()
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Gesamt geprüft: {n_total}")
+    print(f"\n========== Summary ==========")
+    print(f"Total checked: {n_total}")
     print(f"j(E_XY) == j(E):   {n_jXY_eq_jE}")
     print(f"j(E_XZ) == j(E):   {n_jXZ_eq_jE}")
     print(f"j(E_YZ) == j(E):   {n_jYZ_eq_jE}")
     print(f"j(E_XY) == j(E'):  {n_jXY_eq_jEp}")
     print(f"j(E_XZ) == j(E'):  {n_jXZ_eq_jEp}")
     print(f"j(E_YZ) == j(E'):  {n_jYZ_eq_jEp}")
-    print(f"E_xy isogen zu E (irgendwie): {n_some_isog}")
+    print(f"E_xy isogenous to E (somehow): {n_some_isog}")
 
 
 if __name__ == "__main__":

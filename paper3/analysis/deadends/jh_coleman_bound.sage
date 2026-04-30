@@ -1,19 +1,19 @@
 """
-Formelle Coleman-Bound für Konjektur B auf den 11 Chabauty-anwendbaren
-Fasern.
+Formal Coleman bound for Conjecture B on the 11 Chabauty-applicable
+fibers.
 
-Coleman (1985): Für genus-g hyperelliptische Kurve X mit guter Reduktion
-modulo Primzahl p (p > 2g) und rk(J(X)) < g gilt:
-   |X(Q)| ≤ |X(F_p)| + 2g − 2
+Coleman (1985): For genus-g hyperelliptic curve X with good reduction
+modulo prime p (p > 2g) and rk(J(X)) < g, we have:
+   |X(Q)| <= |X(F_p)| + 2g - 2
 
-Für uns: g=3, rk(J(H)) < 3 → |H(Q)| ≤ |H(F_p)| + 4.
+For us: g=3, rk(J(H)) < 3 -> |H(Q)| <= |H(F_p)| + 4.
 
-Strategie: Für jede der 11 Fasern verschiedene Primzahlen p (≥ 7) ausprobieren,
-das Minimum |H(F_p)| finden, und Coleman-Bound anwenden.
+Strategy: For each of the 11 fibers try various primes p (>= 7),
+find the minimum |H(F_p)|, and apply the Coleman bound.
 
-Bei "guter Reduktion" muss disc(f) ≢ 0 (mod p), wobei f das Polynom ist.
+For "good reduction" we need disc(f) != 0 (mod p), where f is the polynomial.
 
-Aufruf: sage jh_coleman_bound.sage
+Usage: sage jh_coleman_bound.sage
 """
 from sage.all import *
 import sys
@@ -22,7 +22,7 @@ from time import time
 
 pari.allocatemem(int(2e9))
 
-# Fasern mit ihrem berechneten rk(J(H)):
+# Fibers with their computed rk(J(H)):
 CHABAUTY_FIBERS_BY_RANK = [
     # rk(J) = 1
     ((2, 1), 1),
@@ -43,8 +43,8 @@ PRIMES_TO_TRY = [int(p) for p in primes(3, 200)]
 
 
 def main():
-    print("Formelle Coleman-Bound für die 11 Chabauty-Fasern\n")
-    print("Ziel: |H(F_p)| ≤ 4 finden → |H(Q)| ≤ 8 (matcht Empirie)\n")
+    print("Formal Coleman bound for the 11 Chabauty fibers\n")
+    print("Goal: find |H(F_p)| <= 4 -> |H(Q)| <= 8 (matches empirics)\n")
 
     print(f"{'(m,n)':>10} {'rk_J':>5} {'best_p':>8} {'|H(F_p)|':>10} {'Stoll':>7} "
           f"{'Coleman':>8} {'empirical':>11} {'closed':>10}")
@@ -63,7 +63,7 @@ def main():
         f = P * Q
         disc = f.discriminant()
         leading = f.leading_coefficient()
-        # Inf-Punkte: 2 wenn Leading-Coeff Quadrat
+        # Inf points: 2 if leading coeff is a square
         n_inf = 2 if leading.is_square() else 0
 
         best_p = None
@@ -79,7 +79,7 @@ def main():
                 count = sum(int(c) for c in Hp.count_points())
             except Exception:
                 continue
-            stoll_bound = count + 2*rk_J          # Stoll: |X(Q)| ≤ N_p + 2r
+            stoll_bound = count + 2*rk_J          # Stoll: |X(Q)| <= N_p + 2r
             coleman_bound = count + 4             # Coleman: N_p + 2g-2
             if best_stoll is None or stoll_bound < best_stoll:
                 best_stoll = stoll_bound
@@ -88,27 +88,27 @@ def main():
                 best_p = p
 
         empirical = 6 + n_inf
-        # Rigoros wenn der ENGSTE bekannte Bound (Stoll) ≤ empirisch
+        # Rigorous if the TIGHTEST known bound (Stoll) <= empirical
         if best_stoll is not None and best_stoll <= empirical:
-            closed = "✓ RIGOROUS"
+            closed = "RIGOROUS"
             n_proven += 1
             rigorous_results.append((m, n, rk_J, best_p, best_count,
                                      best_stoll, empirical))
         else:
-            closed = "−"
+            closed = "-"
         print(f"{f'({m},{n})':>10} {rk_J:>5} {best_p if best_p else '?':>8} "
               f"{best_count if best_count is not None else '?':>10} "
               f"{best_stoll if best_stoll is not None else '?':>7} "
               f"{best_coleman if best_coleman is not None else '?':>8} "
               f"{empirical:>11} {closed:>10}")
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Rigoros geschlossene Fasern: {n_proven}/{len(CHABAUTY_FIBERS_BY_RANK)}")
+    print(f"\n========== Summary ==========")
+    print(f"Rigorously closed fibers: {n_proven}/{len(CHABAUTY_FIBERS_BY_RANK)}")
     if rigorous_results:
-        print("\nDetail rigoros bewiesener Fasern (via Stoll-Bound):")
+        print("\nDetail of rigorously proven fibers (via Stoll bound):")
         for m, n, rk_J, p, c, b, e in rigorous_results:
-            print(f"  ({m},{n}) rk(J)={rk_J}: bei p={p}, |H(F_p)|={c}, "
-                  f"Stoll-Bound={b}, empirisch={e}")
+            print(f"  ({m},{n}) rk(J)={rk_J}: at p={p}, |H(F_p)|={c}, "
+                  f"Stoll bound={b}, empirical={e}")
 
 
 if __name__ == "__main__":

@@ -1,42 +1,62 @@
-# Deadends — dokumentierte Sackgassen
+# Deadends -- documented dead-end approaches
 
-Diese Skripte gehören zu Ansätzen, die wir verfolgt und als nicht zielführend identifiziert haben. Sie sind hier dokumentiert, weil ihre Ergebnisse für das Paper als „warum dieser naheliegende Ansatz nicht funktioniert" interessant sind.
+These scripts belong to approaches we pursued and identified as not
+viable. They are kept here because their outcomes are interesting for
+the paper as "why this seemingly natural approach does not work".
 
-## (g₊, g₋)-Faserung als MW-Hebel
+## (g_+, g_-) fibration as an MW lever
 
-- `gpm_subfiber_explore.py` — Verteilung der Hits über (m,n)-Subfasern in einer (g₊, g₋)-Klasse.
-- `gpm_subfiber_mw_test.sage` — Test, ob (g₊, g₋)-Schicht in E_{m,n}(ℚ) eine Untergruppe/Coset ist.
+- `gpm_subfiber_explore.py` -- distribution of hits across (m, n)
+  subfibers within a (g_+, g_-) class.
+- `gpm_subfiber_mw_test.sage` -- test whether the (g_+, g_-) layer in
+  E_{m, n}(Q) is a subgroup/coset.
 
-**Ergebnis:** Nein. Die (g₊, g₋)-Etikettierung ist eine Repräsentanten-Konvention, kein Punkt-Invariant. Hinter ihr steckt nur eine 2-elementige Klasse mod Quadrate, die durch nicht-triviale Torsion (|tor|=8 in Top-Faser) verschmiert wird.
+**Outcome:** no. The (g_+, g_-) labelling is a representative
+convention, not a point invariant. Behind it sits only a 2-element
+class mod squares, which is smeared by non-trivial torsion
+(|tor| = 8 in the top fiber).
 
-Memory: `gpm_fibration` (Negativ-Erkenntnis Abschnitt).
+## E_{x, y} construction as a "third" elliptic curve
 
-## E_{x,y}-Konstruktion als „dritte" elliptische Kurve
+- `euler_xy_rank.sage` -- rank determination of the x, y curve.
+- `euler_xy_cuboid_intersect.sage` -- intersection test with the
+  cuboid condition.
+- `euler_xy_scale.py` -- 100K-sample brute-force search.
 
-- `euler_xy_rank.sage` — Rang-Bestimmung der x,y-Kurve.
-- `euler_xy_cuboid_intersect.sage` — Schnitt-Test mit Cuboid-Bedingung.
-- `euler_xy_scale.py` — 100K-Stichprobe Brute-Force-Suche.
+**Outcome:** the curve E_{x, y} is algebraically identical to E_{m, n}
+after a permutation of parameters (see `curves_isogeny_check.sage` in
+the parent directory: j-invariants match). E_{x, y} therefore yields
+no independent Mordell-Weil lever.
 
-**Ergebnis:** Die Kurve E_{x,y} ist algebraisch identisch zu E_{m,n} nach einer Permutation der Parameter (siehe `curves_isogeny_check.sage` im Hauptverzeichnis: j-Invarianten stimmen überein). Damit liefert E_{x,y} keinen unabhängigen Mordell-Weil-Hebel.
+## Coleman-Stoll bound too loose for our genus-3 curves
 
-Memory: `euler_xy_kurve` und `drei_kurven_kollaps`.
+- `jh_coleman_bound.sage` -- attempt to use |H(F_p)| + 2g - 2 or
+  Stoll's |H(F_p)| + 2r as a rigorous bound.
 
-## Coleman-Stoll-Bound zu lose für unsere Genus-3-Kurven
+**Outcome:** even with primes up to 200, |H(F_p)| >= 8 always (the
+8 trivial Q-points reduce generically to 8 distinct F_p-points).
+The bound is therefore >= 10 (rk = 1) or >= 12 (rk = 2) -- too loose
+to force |H(Q)| = 8.
 
-- `jh_coleman_bound.sage` — Versuch, |H(F_p)| + 2g−2 oder Stoll's |H(F_p)| + 2r als rigorose Schranke zu nutzen.
+**What worked instead:** the torsion trick
+(`jh_torsion_scale.sage` in the parent directory) -- directly via
+|E_q(Q)| = 4 rather than via Stoll.
 
-**Ergebnis:** Auch mit Primzahlen bis 200 ist |H(F_p)| ≥ 8 immer (denn die 8 trivialen Q-Punkte reduzieren generisch zu 8 verschiedenen F_p-Punkten). Damit ist die Bound ≥ 10 (rk=1) bzw. ≥ 12 (rk=2) — zu lose um |H(Q)| = 8 zu erzwingen.
+## Refined torsion trick with bug
 
-**Was stattdessen funktionierte:** Torsions-Trick (`jh_torsion_scale.sage` im Hauptverzeichnis) — direkt über |E_q(Q)| = 4 statt über Stoll.
+- `jh_torsion_refined.sage` -- attempt to cover the |tors| != 4 cases
+  by brute-force enumeration on the quartic.
 
-## Verfeinerter Torsions-Trick mit Bug
+**Outcome:** bug -- double-counting via the (w, +/-V) symmetry plus
+points at infinity not captured. The correct approach is to use
+Sage's `torsion_subgroup()` directly.
 
-- `jh_torsion_refined.sage` — Versuch, |tors|≠4-Fälle abzudecken durch Brute-Force-Enumeration auf der Quartik.
+## Sage API test for genus-3 Jacobian rank
 
-**Ergebnis:** Bug — Doppelzählung über (w, ±V)-Symmetrie + nicht erfasste Punkte im Unendlichen. Korrekt wäre: Sage's `torsion_subgroup()` direkt nutzen.
+- `jacobian_rank_attempt.sage` -- attempt to use
+  `J = HyperellipticCurve.jacobian()` for rank determination.
 
-## Sage-API-Test für Genus-3-Jacobian-Rang
-
-- `jacobian_rank_attempt.sage` — Versuch, `J = HyperellipticCurve.jacobian()` für Rang-Bestimmung zu nutzen.
-
-**Ergebnis:** Sage 10.7 hat keine `rank()` oder `analytic_rank()` für Genus-3-Jacobians implementiert. Wir kommen über die explizite J(H) ~ E_PQ × E_uV × E_3 Zerlegung weiter, nicht über die Jacobian-Klasse direkt.
+**Outcome:** Sage 10.7 has no `rank()` or `analytic_rank()`
+implemented for genus-3 Jacobians. We get further via the explicit
+decomposition J(H) ~ E_PQ x E_uV x E_3, not via the Jacobian class
+directly.

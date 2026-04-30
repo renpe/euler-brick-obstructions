@@ -1,15 +1,14 @@
 """
-Vollständige Analyse: für ALLE 518 Fasern bei M_MAX=50 die Ränge von
-E_PQ, E_uV, E_3 bestimmen und die Abdeckung der Torsions-Trick-Methode
-quantifizieren.
+Full analysis: for ALL 518 fibers at M_MAX=50 determine the ranks of
+E_PQ, E_uV, E_3 and quantify the coverage of the torsion-trick method.
 
-Eine Faser ist mit Torsions-Trick rigoros lösbar wenn:
-  rk(E_PQ) = 0 ODER rk(E_uV) = 0 ODER rk(E_3) = 0
-und |E_q(Q)_tors| = 4 (für den rk=0-Quotienten).
+A fiber is rigorously solvable by the torsion trick if:
+  rk(E_PQ) = 0 OR rk(E_uV) = 0 OR rk(E_3) = 0
+and |E_q(Q)_tors| = 4 (for the rk=0 quotient).
 
-Wenn ALLE drei Ränge ≥ 1 sind: Chabauty greift NUR wenn Total-Rang < 3.
+If ALL three ranks are >= 1: Chabauty applies ONLY when total rank < 3.
 
-Aufruf: sage jh_three_quotients.sage [M_MAX]
+Usage: sage jh_three_quotients.sage [M_MAX]
 """
 from sage.all import *
 import sys
@@ -59,12 +58,12 @@ def safe_torsion(E):
 
 
 def main():
-    print(f"Drei-Quotienten-Analyse für (m,n) bis M_MAX={M_MAX}\n")
+    print(f"Three-quotient analysis for (m,n) up to M_MAX={M_MAX}\n")
 
     n_total = 0
-    n_torsion_trick = 0   # mindestens ein rk=0 quotient + |tors|=4
-    n_chabauty_only = 0    # total rk < 3 aber kein rk=0
-    n_uncovered = 0        # total rk ≥ 3
+    n_torsion_trick = 0   # at least one rk=0 quotient + |tors|=4
+    n_chabauty_only = 0    # total rk < 3 but no rk=0
+    n_uncovered = 0        # total rk >= 3
     by_pattern = Counter()
     proven_torsion = []
     chabauty_only = []
@@ -80,7 +79,7 @@ def main():
             V2 = 2*m*n
             W2 = m*m + n*n
 
-            # Drei Quartiken
+            # Three quartics
             Rs = PolynomialRing(QQ, 'S')
             S = Rs.gen()
             P_s = V2**2 * S**2 + (4*U2**2 - 2*V2**2) * S + V2**2
@@ -109,11 +108,11 @@ def main():
             if any(r is None for r in [rk_PQ_lo, rk_uV_lo, rk_3_lo]):
                 continue
 
-            # Pattern-Klassifikation
+            # Pattern classification
             pattern = (rk_PQ_lo, rk_uV_lo, rk_3_lo)
             by_pattern[pattern] += 1
 
-            # Welcher Quotient hat rk=0 mit eindeutigem rank (lo == hi)?
+            # Which quotient has rk=0 with unambiguous rank (lo == hi)?
             method = None
             quotient = None
             if rk_3_lo == 0 and rk_3_hi == 0:
@@ -132,10 +131,10 @@ def main():
                     n_torsion_trick += 1
                     proven_torsion.append((m, n, method, tors))
                 else:
-                    # rk=0 aber |tors|≠4: feinere Analyse nötig
+                    # rk=0 but |tors| != 4: finer analysis required
                     pass
             else:
-                # Alle Ränge ≥ 1
+                # All ranks >= 1
                 total_rk_lo = rk_PQ_lo + rk_uV_lo + rk_3_lo
                 total_rk_hi = rk_PQ_hi + rk_uV_hi + rk_3_hi
                 if total_rk_hi < 3:
@@ -145,14 +144,14 @@ def main():
                     n_uncovered += 1
                     uncovered.append((m, n, pattern, total_rk_lo, total_rk_hi))
 
-    print(f"\n========== ZUSAMMENFASSUNG ==========")
-    print(f"Gesamt geprüfte Fasern: {n_total}")
-    print(f"  Torsions-Trick (|tors|=4):           {n_torsion_trick}")
-    print(f"  Nur via Chabauty (Total-Rang < 3):   {n_chabauty_only}")
-    print(f"  Unabgedeckt (Total-Rang ≥ 3):        {n_uncovered}")
-    print(f"  Differenz (rk=0 aber |tors|≠4):     {n_total - n_torsion_trick - n_chabauty_only - n_uncovered}")
+    print(f"\n========== SUMMARY ==========")
+    print(f"Total fibers checked: {n_total}")
+    print(f"  Torsion trick (|tors|=4):           {n_torsion_trick}")
+    print(f"  Only via Chabauty (total rank < 3): {n_chabauty_only}")
+    print(f"  Uncovered (total rank >= 3):        {n_uncovered}")
+    print(f"  Difference (rk=0 but |tors| != 4):  {n_total - n_torsion_trick - n_chabauty_only - n_uncovered}")
 
-    print(f"\nVerteilung nach (rk_PQ, rk_uV, rk_3):")
+    print(f"\nDistribution by (rk_PQ, rk_uV, rk_3):")
     for pat, c in sorted(by_pattern.items()):
         marker = ""
         if 0 in pat:
@@ -164,7 +163,7 @@ def main():
         print(f"  {pat}: {c}{marker}")
 
     if uncovered:
-        print(f"\nUnabgedeckte Fasern (zuerst 20):")
+        print(f"\nUncovered fibers (first 20):")
         for m, n, pat, lo, hi in uncovered[:20]:
             print(f"  ({m},{n}): rk = {pat}, total = {lo}-{hi}")
 

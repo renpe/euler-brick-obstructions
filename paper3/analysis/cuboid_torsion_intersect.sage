@@ -1,19 +1,19 @@
 """
-Rigoroser Beweis von Konjektur B auf Fasern (m,n) mit rk(E)=rk(E')=0.
+Rigorous proof of Conjecture B on fibers (m,n) with rk(E)=rk(E')=0.
 
-Vorgehen:
-  1. Für jede Faser (m, n): baue E_{m,n} und E'_{m,n}.
-  2. Bestimme Ränge — wenn beide 0: weiter, sonst überspringen.
-  3. Berechne Torsion(E) und Torsion(E'). Alle rationalen Punkte beider Kurven
-     sind Torsion (da rang 0).
-  4. Pull beide Torsionsmengen zurück auf die t-Linie via Quartik-Inverse.
-  5. Schnitt der t-Werte: das sind ALLE potenziellen Cuboid-Kandidaten in
-     dieser Faser. Trivial: t ∈ {0, ±1, ∞}. Alles andere wäre Cuboid.
+Procedure:
+  1. For each fiber (m, n): build E_{m,n} and E'_{m,n}.
+  2. Determine ranks - if both are 0: continue, otherwise skip.
+  3. Compute Torsion(E) and Torsion(E'). All rational points of both curves
+     are torsion (since rank 0).
+  4. Pull both torsion sets back to the t-line via quartic inverse.
+  5. Intersection of the t-values: these are ALL potential cuboid candidates
+     in this fiber. Trivial: t in {0, +-1, infty}. Anything else would be a cuboid.
 
-Wenn der Schnitt nur triviale Werte liefert → Konjektur B BEWIESEN für diese
-(m, n). Aufgesammelt über alle rk=0/0-Fasern: rigoroser Teilbeweis.
+If the intersection only yields trivial values -> Conjecture B PROVED for these
+(m, n). Aggregated over all rk=0/0 fibers: rigorous partial proof.
 
-Aufruf:
+Usage:
     sage cuboid_torsion_intersect.sage [M_MAX]
     Default: 30
 """
@@ -40,8 +40,8 @@ def with_timeout(seconds, fn):
 
 
 def build_quartics(m, n):
-    """Liefert die zwei Quartik-Polynome P(t) (Master) und Q(t) (Cuboid)
-    sowie γ-Werte für Punkt-Pullback."""
+    """Return the two quartic polynomials P(t) (master) and Q(t) (cuboid)
+    along with gamma values for point pullback."""
     U2 = m*m - n*n
     V2 = 2*m*n
     W2 = m*m + n*n
@@ -53,8 +53,8 @@ def build_quartics(m, n):
 
 
 def quartic_to_curve(P_quartic):
-    """Konvertiert y² = P(T) (Quartik) in EllipticCurve (Weierstraß-Form)
-    + Forward/Backward-Maps (T,Y) ↔ Punkt."""
+    """Convert y^2 = P(T) (quartic) to EllipticCurve (Weierstrass form)
+    + forward/backward maps (T,Y) <-> point."""
     Rt = P_quartic.parent()
     T = Rt.gen()
     R = PolynomialRing(QQ, ['x', 'y'])
@@ -66,14 +66,14 @@ def quartic_to_curve(P_quartic):
 
 
 def t_values_of_torsion(E, P_quartic):
-    """Pull jeden Torsionspunkt zurück auf t-Werte. Liefert Set rationaler t."""
+    """Pull each torsion point back to t-values. Returns set of rational t."""
     Rt = P_quartic.parent()
     T_var = Rt.gen()
     t_set = set()
-    # Naiv: enumeriere kleine t-Werte und prüfe, ob P(t) = Quadrat
-    # plus die t-Werte aus expliziten Punkten via lift_x.
-    # Pragmatisch: enumeriere rationale t mit kleinem Zähler/Nenner und prüfe.
-    # Da alle Torsionspunkte kleine Höhe haben, reichen kleine t.
+    # Naive: enumerate small t-values and check whether P(t) = square
+    # plus the t-values from explicit points via lift_x.
+    # Pragmatic: enumerate rational t with small numerator/denominator and check.
+    # Since all torsion points have small height, small t suffice.
     BOUND = 50
     for num in range(-BOUND, BOUND + 1):
         for den in range(1, BOUND + 1):
@@ -124,21 +124,21 @@ def main():
             trivial = {QQ(0), QQ(1), QQ(-1)}
             non_trivial = shared - trivial
             print(f"{m:>4} {n:>4}     0      0   shared={sorted(shared)}"
-                  + (f"  ★NON-TRIVIAL: {sorted(non_trivial)}" if non_trivial else ""))
+                  + (f"  *NON-TRIVIAL: {sorted(non_trivial)}" if non_trivial else ""))
             if non_trivial:
                 suspicious_fibers.append((m, n, sorted(non_trivial)))
             else:
                 proven_fibers.append((m, n))
             sys.stdout.flush()
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"rk=0/0 Fasern: {len(rk00_fibers)}")
-    print(f"  Konjektur B explizit verifiziert: {len(proven_fibers)}")
-    print(f"  Verdächtige (mit nicht-trivialem Schnitt): {len(suspicious_fibers)}")
+    print(f"\n========== Summary ==========")
+    print(f"rk=0/0 fibers: {len(rk00_fibers)}")
+    print(f"  Conjecture B explicitly verified: {len(proven_fibers)}")
+    print(f"  Suspicious (with non-trivial intersection): {len(suspicious_fibers)}")
     if suspicious_fibers:
-        print(f"\n★★★ ALARM ★★★")
+        print(f"\n*** ALARM ***")
         for m, n, ts in suspicious_fibers:
-            print(f"  ({m},{n}): nicht-triviales t = {ts}")
+            print(f"  ({m},{n}): non-trivial t = {ts}")
 
 
 if __name__ == "__main__":

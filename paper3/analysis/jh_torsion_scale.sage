@@ -1,12 +1,12 @@
 """
-Skalierung des Torsions-Tricks auf alle (m,n) bis M_MAX.
+Scaling of the torsion trick to all (m,n) up to M_MAX.
 
-Für jede Faser:
-  1. Berechne rk(E_uV) und rk(E_3).
-  2. Wenn mindestens einer 0 ist: rigoros, schließe Konjektur B ab.
-  3. Sammle Statistik.
+For each fiber:
+  1. Compute rk(E_uV) and rk(E_3).
+  2. If at least one is 0: rigorous, close Conjecture B.
+  3. Collect statistics.
 
-Aufruf:  sage jh_torsion_scale.sage [M_MAX]
+Usage:  sage jh_torsion_scale.sage [M_MAX]
 """
 from sage.all import *
 import sys
@@ -41,7 +41,7 @@ def quartic_to_E(P_quartic):
 
 
 def safe_rank_lo(E):
-    """Liefere lower bound der Rang (oder None bei Fehler)."""
+    """Return lower bound of rank (or None on error)."""
     try:
         result = with_timeout(TIMEOUT, lambda: E.pari_curve().ellrank())
         return int(result[0]), int(result[1])
@@ -57,8 +57,8 @@ def torsion_size(E):
 
 
 def main():
-    print(f"Skalierung Torsions-Trick auf (m,n) bis M_MAX={M_MAX}")
-    print(f"Wir suchen Fasern mit rk(E_uV) = 0 ODER rk(E_3) = 0.\n")
+    print(f"Scaling torsion trick to (m,n) up to M_MAX={M_MAX}")
+    print(f"We are looking for fibers with rk(E_uV) = 0 OR rk(E_3) = 0.\n")
 
     print(f"{'(m,n)':>10} {'rk_uV':>6} {'rk_3':>5} {'|tor_uV|':>9} {'|tor_3|':>8} "
           f"{'method':>8} {'bound':>6} {'OK?':>4}")
@@ -79,11 +79,11 @@ def main():
             V2 = 2*m*n
             W2 = m*m + n*n
 
-            # E_uV: V² = (V₂²u² + 4(U₂²-V₂²))(W₂²u² - 4V₂²)
+            # E_uV: V^2 = (V2^2 u^2 + 4(U2^2-V2^2))(W2^2 u^2 - 4 V2^2)
             Ru = PolynomialRing(QQ, 'U')
             U = Ru.gen()
             quartic_uV = (V2**2 * U**2 + 4*(U2**2 - V2**2)) * (W2**2 * U**2 - 4*V2**2)
-            # E_3: V² = (V₂²w² + 4U₂²)(W₂²w² + 4U₂²)
+            # E_3: V^2 = (V2^2 w^2 + 4 U2^2)(W2^2 w^2 + 4 U2^2)
             Rw = PolynomialRing(QQ, 'W')
             W = Rw.gen()
             quartic_3 = (V2**2 * W**2 + 4*U2**2) * (W2**2 * W**2 + 4*U2**2)
@@ -97,26 +97,26 @@ def main():
             rk_uV_lo, rk_uV_hi = safe_rank_lo(E_uV)
             rk_3_lo, rk_3_hi = safe_rank_lo(E_3)
 
-            method = "—"
+            method = "-"
             tor_uV = None
             tor_3 = None
             bound = None
-            ok = "—"
+            ok = "-"
 
-            # Wir nehmen den, dessen rk genau 0 ist (lo == hi == 0)
+            # We pick the one whose rk is exactly 0 (lo == hi == 0)
             if rk_3_lo == 0 and rk_3_hi == 0:
                 tor_3 = torsion_size(E_3)
                 if tor_3 is not None:
                     method = "E_3"
                     bound = 2 * tor_3
-                    # Empirisch wissen wir |H(Q)| ≥ 8 (6 affine + 2 inf, alle trivial)
+                    # Empirically we know |H(Q)| >= 8 (6 affine + 2 inf, all trivial)
                     if bound == 8:
-                        ok = "✓"
+                        ok = "yes"
                         n_proven += 1
                         proven_fibers.append((m, n, "E_3", tor_3))
                         by_torsion_size[tor_3] += 1
                     else:
-                        ok = f"≤{bound}"
+                        ok = f"<={bound}"
                         n_uncertain += 1
             elif rk_uV_lo == 0 and rk_uV_hi == 0:
                 tor_uV = torsion_size(E_uV)
@@ -124,15 +124,15 @@ def main():
                     method = "E_uV"
                     bound = 2 * tor_uV
                     if bound == 8:
-                        ok = "✓"
+                        ok = "yes"
                         n_proven += 1
                         proven_fibers.append((m, n, "E_uV", tor_uV))
                         by_torsion_size[tor_uV] += 1
                     else:
-                        ok = f"≤{bound}"
+                        ok = f"<={bound}"
                         n_uncertain += 1
             else:
-                method = "—"
+                method = "-"
 
             tor_uV_str = str(tor_uV) if tor_uV else "?"
             tor_3_str = str(tor_3) if tor_3 else "?"
@@ -141,16 +141,16 @@ def main():
                   f"{tor_3_str:>8} {method:>8} {bound if bound else '?':>6} {ok:>4}")
             sys.stdout.flush()
 
-    print(f"\n========== ZUSAMMENFASSUNG ==========")
-    print(f"Gesamt geprüfte Fasern: {n_total}")
-    print(f"Konjektur B RIGOROS BEWIESEN: {n_proven}")
-    print(f"Unsicher (Bound > 8): {n_uncertain}")
-    print(f"Verteilung nach Torsion-Größe:")
+    print(f"\n========== SUMMARY ==========")
+    print(f"Total fibers checked: {n_total}")
+    print(f"Conjecture B RIGOROUSLY PROVED: {n_proven}")
+    print(f"Uncertain (bound > 8): {n_uncertain}")
+    print(f"Distribution by torsion size:")
     for sz, c in sorted(by_torsion_size.items()):
-        print(f"  |tors| = {sz}: {c} Fasern")
+        print(f"  |tors| = {sz}: {c} fibers")
 
     if proven_fibers:
-        print(f"\nBewiesene Fasern (m, n):")
+        print(f"\nProved fibers (m, n):")
         for m, n, method, tor in proven_fibers:
             print(f"  ({m},{n}) via {method} (|tors|={tor})")
 

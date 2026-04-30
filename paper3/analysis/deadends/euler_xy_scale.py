@@ -1,20 +1,20 @@
 """
-Massiver brute-force-Schnitt-Test: für jedes (x_prim, y_prim) aus pub.master_hits
-enumeriere α = num/den mit |num|, |den| ≤ BOUND und prüfe:
-  (a) P(num,den) = num⁴ − 2·(x²+y²)·num²·den² + (x²−y²)²·den⁴ ist Quadrat
-  (b) Falls ja, liegt der zugehörige z-Wert auch in Cuboid-Position
-      (x²+y²+z² = Quadrat)?
+Massive brute-force intersection test: for each (x_prim, y_prim) from pub.master_hits
+enumerate alpha = num/den with |num|, |den| <= BOUND and check:
+  (a) P(num,den) = num^4 - 2*(x^2+y^2)*num^2*den^2 + (x^2-y^2)^2*den^4 is a square
+  (b) If yes, does the corresponding z value also lie in cuboid position
+      (x^2+y^2+z^2 = square)?
 
-Nur (b) interessiert uns: jeder Treffer wäre ein perfekter Cuboid-Kandidat.
+Only (b) interests us: each hit would be a perfect cuboid candidate.
 
-Technische Beobachtung: Bricks in pub haben oft α >> BOUND (z.B. (44,117,240)
-hat α=511). Brute-force findet also nicht alle existierenden Bricks, sondern
-nur diejenigen, deren elliptische Kurve „kleine" rationale Punkte hat. Das
-ist trotzdem ein wertvoller Stichprobentest — weil ein perfekter Cuboid mit
-einer α-Position bei kleiner Höhe ein „leichter" wäre, den wir bisher nicht
-entdeckt hätten.
+Technical observation: bricks in pub often have alpha >> BOUND (e.g. (44,117,240)
+has alpha=511). Brute force therefore does not find all existing bricks but
+only those whose elliptic curve has "small" rational points. That is
+nevertheless a valuable spot-check - because a perfect cuboid with an alpha
+position at small height would be an "easy" one that we have not yet
+discovered.
 
-Aufruf:
+Usage:
     python3 euler_xy_scale.py [N_PAIRS=10000] [BOUND=200] [WORKERS=8]
 """
 from __future__ import annotations
@@ -45,17 +45,17 @@ def is_perfect_square(n: int) -> int | None:
 
 
 def process_pair(args):
-    """Brute-force über α = num/den. Liefert
+    """Brute-force over alpha = num/den. Returns
        (n_alpha_pts, n_cuboid_candidates, list_of_cuboids)
-    list_of_cuboids: [(x, y, z_num, z_den, w, num, den)] für jeden Cuboid-Kandidat.
+    list_of_cuboids: [(x, y, z_num, z_den, w, num, den)] for each cuboid candidate.
     """
     x, y, bound = args
-    A = x*x + y*y                  # 2·(Koeffizient von α²)/2
-    B = (x*x - y*y)**2             # konstanter Term
+    A = x*x + y*y                  # 2*(coefficient of alpha^2)/2
+    B = (x*x - y*y)**2             # constant term
     n_alpha = 0
     cuboids = []
-    # 2A·num²·den² in der inneren Schleife
-    # P(num, den) · den⁴/den⁴ = num⁴ − 2A·num²·den² + B·den⁴
+    # 2A*num^2*den^2 in the inner loop
+    # P(num, den) * den^4/den^4 = num^4 - 2A*num^2*den^2 + B*den^4
     den2_table = [d*d for d in range(bound + 1)]
     den4_table = [d*d for d in den2_table]
     for num in range(1, bound + 1):
@@ -73,12 +73,12 @@ def process_pair(args):
             if w is None:
                 continue
             n_alpha += 1
-            # z = w / (2·num·den) (positive root)
-            # f1 = x² + y² + z² = (4·num²·den²·A + w²) / (4·num²·den²)
+            # z = w / (2*num*den) (positive root)
+            # f1 = x^2 + y^2 + z^2 = (4*num^2*den^2*A + w^2) / (4*num^2*den^2)
             T = 4*num2*den2*A + P_int
             s = is_perfect_square(T)
             if s is not None:
-                # ★★★ Cuboid-Kandidat
+                # *** cuboid candidate
                 z_num = w
                 z_den = 2*num*den
                 cuboids.append((x, y, z_num, z_den, w, num, den))
@@ -89,7 +89,7 @@ def main():
     print(f"N_PAIRS={N_PAIRS}, BOUND={BOUND}, WORKERS={WORKERS}\n")
     conn = pub_db.connect()
     cur = conn.cursor()
-    print(f"Lade kleinste {N_PAIRS} (x_prim, y_prim) aus DB...")
+    print(f"Loading smallest {N_PAIRS} (x_prim, y_prim) from DB...")
     cur.execute("""
         SELECT x_prim, y_prim, GREATEST(x_prim, y_prim) AS mxy
         FROM pub.master_hits
@@ -99,7 +99,7 @@ def main():
     """, (N_PAIRS,))
     pairs = [(int(x), int(y), BOUND) for x, y, _ in cur.fetchall()]
     conn.close()
-    print(f"Geladen: {len(pairs)} Paare\n")
+    print(f"Loaded: {len(pairs)} pairs\n")
 
     t0 = time()
     n_alpha_total = 0
@@ -115,25 +115,25 @@ def main():
             if cubs:
                 all_cuboids.extend(cubs)
                 for cub in cubs:
-                    print(f"  ★★★ CUBOID-KANDIDAT: {cub}", flush=True)
+                    print(f"  *** CUBOID CANDIDATE: {cub}", flush=True)
             now = time()
             if now - last_report > 10:
                 rate = (i + 1) / (now - t0)
                 eta = (len(pairs) - (i + 1)) / rate if rate > 0 else 0
-                print(f"  {i+1}/{len(pairs)}  α-Treffer={n_alpha_total}  "
+                print(f"  {i+1}/{len(pairs)}  alpha hits={n_alpha_total}  "
                       f"cuboid={n_cuboid_total}  {rate:.1f} pairs/s  "
                       f"ETA {eta/60:.1f} min", flush=True)
                 last_report = now
 
-    print(f"\n========== Zusammenfassung ==========")
-    print(f"Geprüft: {len(pairs)} (x,y)-Paare, BOUND={BOUND}")
-    print(f"Gesamt α-Treffer (Euler-Bricks proportional zu (x,y)): {n_alpha_total}")
-    print(f"Cuboid-Kandidaten: {n_cuboid_total}")
-    print(f"Laufzeit: {(time()-t0)/60:.1f} min")
+    print(f"\n========== Summary ==========")
+    print(f"Checked: {len(pairs)} (x,y) pairs, BOUND={BOUND}")
+    print(f"Total alpha hits (Euler bricks proportional to (x,y)): {n_alpha_total}")
+    print(f"Cuboid candidates: {n_cuboid_total}")
+    print(f"Runtime: {(time()-t0)/60:.1f} min")
     if all_cuboids:
-        print(f"\n★★★ ALARM: {len(all_cuboids)} Cuboid-Kandidaten ★★★")
+        print(f"\n*** ALARM: {len(all_cuboids)} cuboid candidates ***")
         for x, y, zn, zd, w, n, d in all_cuboids:
-            print(f"  (x={x}, y={y}, z={zn}/{zd}, α={n}/{d})")
+            print(f"  (x={x}, y={y}, z={zn}/{zd}, alpha={n}/{d})")
 
 
 if __name__ == "__main__":

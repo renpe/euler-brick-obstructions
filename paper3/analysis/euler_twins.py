@@ -1,17 +1,17 @@
 """
-Detailanalyse der Euler-Brick-Zwillinge.
+Detail analysis of Euler brick twins.
 
-Empirisch: in 1.28M primitiven Bricks gibt es genau 38 Paare (x_prim, y_prim),
-die mit ≥2 verschiedenen z_prim einen Euler-Brick bilden. Diese „Zwillinge"
-sind die einzigen Punkte, an denen die (x,y) → z-Faserung mehrdeutig wird.
+Empirically: in 1.28M primitive bricks there are exactly 38 pairs (x_prim, y_prim)
+that form an Euler brick with >=2 different z_prim. These "twins" are the only
+points where the (x,y) -> z fibration becomes ambiguous.
 
-Wir suchen nach algebraischen Mustern:
-  - Verhältnis z₁/z₂, z₁·z₂, z₁+z₂, z₂−z₁
-  - ggT-Strukturen zwischen z₁ und z₂
-  - Verhältnis f1(brick1) / f1(brick2)
-  - Beziehung zu (a,b,m,n)-Parametern: liegen die zwei Bricks in derselben
-    Master-Faser oder verschiedenen?
-  - Existieren Tripletts (3+ z's für dasselbe (x,y))?
+We search for algebraic patterns:
+  - ratio z1/z2, z1*z2, z1+z2, z2-z1
+  - gcd structures between z1 and z2
+  - ratio f1(brick1) / f1(brick2)
+  - relation to (a,b,m,n) parameters: do the two bricks lie in the same
+    master fiber or different ones?
+  - Are there triplets (3+ z's for the same (x,y))?
 """
 from __future__ import annotations
 
@@ -34,19 +34,19 @@ def is_square(n):
 def main():
     conn = pub_db.connect()
     cur = conn.cursor()
-    print("Lade alle Master-Hits mit (a,b,m,n) und primitive Bricks...")
+    print("Loading all master hits with (a,b,m,n) and primitive bricks...")
     cur.execute("""
         SELECT id, a, b, m, n, x_prim, y_prim, z_prim, g_scale
         FROM pub.master_hits
     """)
     rows = cur.fetchall()
-    print(f"Geladen: {len(rows)} Hits.\n")
+    print(f"Loaded: {len(rows)} hits.\n")
 
-    # Sortiere (x, y) und sammle alle z's
+    # Sort (x, y) and collect all z's
     xy_to_entries = defaultdict(list)
     for hid, a, b, m, n, x, y, z, g in rows:
         x, y, z = int(x), int(y), int(z)
-        a, b = sorted([x, y])  # vereinheitliche
+        a, b = sorted([x, y])  # canonicalize
         xy_to_entries[(a, b)].append({
             'hit_id': int(hid),
             'a': int(a), 'b': int(b), 'm': int(m), 'n': int(n),
@@ -55,20 +55,20 @@ def main():
 
     twins = {xy: e for xy, e in xy_to_entries.items() if len({en['z'] for en in e}) > 1}
     triplets = {xy: e for xy, e in xy_to_entries.items() if len({en['z'] for en in e}) > 2}
-    print(f"Zwillinge (≥2 verschiedene z): {len(twins)}")
-    print(f"Tripletts (≥3 verschiedene z): {len(triplets)}")
+    print(f"Twins (>=2 different z): {len(twins)}")
+    print(f"Triplets (>=3 different z): {len(triplets)}")
     if triplets:
-        print("★★★ Triplett(s) gefunden! ★★★")
+        print("*** Triplet(s) found! ***")
         for xy, ee in triplets.items():
             print(f"  ({xy}): zs = {sorted({e['z'] for e in ee})}")
     print()
 
-    # Für die 38 Zwillinge: detaillierte Analyse
-    print(f"=== Detail-Analyse der {len(twins)} Zwillingspaare ===\n")
+    # For the 38 twins: detailed analysis
+    print(f"=== Detail analysis of the {len(twins)} twin pairs ===\n")
 
     twin_records = []
     for (x_prim, y_prim), entries in sorted(twins.items()):
-        # Eindeutige (x,y,z)-Bricks (ein z kann mehrere (a,b,m,n)-Tupel haben)
+        # Unique (x,y,z) bricks (a single z can have multiple (a,b,m,n) tuples)
         z_to_entry = {}
         for e in entries:
             if e['z'] not in z_to_entry:
@@ -94,7 +94,7 @@ def main():
             'ab_1': (e1['a'], e1['b']), 'ab_2': (e2['a'], e2['b']),
         })
 
-    # Tabellen-Ausgabe
+    # Tabular output
     print(f"{'idx':>3} {'x':>10} {'y':>10} {'z1':>10} {'z2':>10} "
           f"{'gcd':>6} {'z2/z1':>8} {'mn1':>10} {'mn2':>10}")
     for i, r in enumerate(twin_records):
@@ -102,12 +102,12 @@ def main():
               f"{r['gcd_z1z2']:>6} {r['z2_over_z1']:>8.3f} "
               f"{str(r['mn_1']):>10} {str(r['mn_2']):>10}")
 
-    # Suche nach algebraischer Beziehung z1, z2 ↔ x, y
-    print("\n=== Algebraische Tests ===")
-    # Test 1: z1 + z2 = c * (x + y)?  oder z1*z2 = c * x*y?
-    print("\nTest: ist z₁·z₂ irgendein 'einfacher' Wert in x,y?")
-    print(f"{'idx':>3} {'z1·z2':>20} {'x²·y²':>20} {'x²+y²':>15} {'(x²+y²)²':>20} "
-          f"{'z1·z2 / x²y²':>15}")
+    # Search for algebraic relation z1, z2 <-> x, y
+    print("\n=== Algebraic tests ===")
+    # Test 1: z1 + z2 = c * (x + y)?  or z1*z2 = c * x*y?
+    print("\nTest: is z1*z2 some 'simple' value in x,y?")
+    print(f"{'idx':>3} {'z1*z2':>20} {'x^2*y^2':>20} {'x^2+y^2':>15} {'(x^2+y^2)^2':>20} "
+          f"{'z1*z2 / x^2y^2':>15}")
     for i, r in enumerate(twin_records[:15]):
         x, y = r['x'], r['y']
         z1z2 = r['z1'] * r['z2']
@@ -116,48 +116,48 @@ def main():
         print(f"{i:>3} {z1z2:>20} {x2y2:>20} {x*x+y*y:>15} "
               f"{(x*x+y*y)**2:>20} {ratio:>15.6f}")
 
-    # Test: z1 + z2 vs. einfache Polynome in x,y
-    print("\nTest: ist z₁+z₂ einfach?")
-    print(f"{'idx':>3} {'z1+z2':>15} {'2·x':>10} {'2·y':>10} {'x+y':>10} "
-          f"{'x²+y²':>15} {'sqrt(z1·z2)':>15}")
+    # Test: z1 + z2 vs. simple polynomials in x,y
+    print("\nTest: is z1+z2 simple?")
+    print(f"{'idx':>3} {'z1+z2':>15} {'2*x':>10} {'2*y':>10} {'x+y':>10} "
+          f"{'x^2+y^2':>15} {'sqrt(z1*z2)':>15}")
     for i, r in enumerate(twin_records[:15]):
         x, y = r['x'], r['y']
         sum_z = r['z1'] + r['z2']
-        # Suchen "einfacher" Ausdruck: ist sum_z teilbar durch x oder y?
+        # Search "simple" expression: is sum_z divisible by x or y?
         flag = ""
         if sum_z % x == 0:
             flag += " /x"
         if sum_z % y == 0:
             flag += " /y"
         if (x*x + y*y) > 0 and sum_z % (x*x + y*y) == 0:
-            flag += " /(x²+y²)"
+            flag += " /(x^2+y^2)"
         sqrt_prod = isqrt(r['z1'] * r['z2'])
         is_sq = (sqrt_prod * sqrt_prod == r['z1'] * r['z2'])
-        sq_str = "□" if is_sq else " "
+        sq_str = "sq" if is_sq else " "
         print(f"{i:>3} {sum_z:>15} {2*x:>10} {2*y:>10} {x+y:>10} "
               f"{x*x+y*y:>15} {sqrt_prod:>15}{sq_str}{flag}")
 
-    # f1-Quotient: ist f1_2 / f1_1 = einfache Rationalzahl?
-    print("\nTest: ist f1_2 / f1_1 ein 'schönes' Verhältnis?")
-    print(f"{'idx':>3} {'f1_1':>15} {'f1_2':>15} {'ratio':>10} {'p/q vereinfacht':>20}")
+    # f1 quotient: is f1_2 / f1_1 = simple rational?
+    print("\nTest: is f1_2 / f1_1 a 'nice' ratio?")
+    print(f"{'idx':>3} {'f1_1':>15} {'f1_2':>15} {'ratio':>10} {'p/q simplified':>20}")
     from fractions import Fraction
     for i, r in enumerate(twin_records[:20]):
         f = Fraction(r['f1_2'], r['f1_1'])
         print(f"{i:>3} {r['f1_1']:>15} {r['f1_2']:>15} "
               f"{r['f1_ratio']:>10.4f} {f.numerator}/{f.denominator}")
 
-    # Brahmagupta-Test: gibt es eine quadratische Gleichung in z, deren
-    # zwei Lösungen z1 und z2 sind, mit Koeffizienten in x,y?
-    print("\nTest: Quadratische Gleichung az² + bz + c = 0 mit Roots z1, z2")
-    print("       z1+z2 = -b/a, z1·z2 = c/a")
-    print(f"{'idx':>3} {'z1+z2':>15} {'z1·z2':>20} {'(z1+z2)²−4·z1·z2':>20}")
+    # Brahmagupta test: is there a quadratic equation in z whose
+    # two solutions are z1 and z2, with coefficients in x,y?
+    print("\nTest: quadratic equation az^2 + bz + c = 0 with roots z1, z2")
+    print("       z1+z2 = -b/a, z1*z2 = c/a")
+    print(f"{'idx':>3} {'z1+z2':>15} {'z1*z2':>20} {'(z1+z2)^2-4*z1*z2':>20}")
     for i, r in enumerate(twin_records[:15]):
         sumz = r['z1'] + r['z2']
         prodz = r['z1'] * r['z2']
         disc = sumz*sumz - 4*prodz
-        # ist disc = (z2-z1)² → ja immer per Vieta
+        # disc = (z2-z1)^2 -> yes always by Vieta
         print(f"{i:>3} {sumz:>15} {prodz:>20} {disc:>20}  "
-              f"= (z₂−z₁)² = {(r['z2']-r['z1'])**2}")
+              f"= (z2-z1)^2 = {(r['z2']-r['z1'])**2}")
 
     conn.close()
 

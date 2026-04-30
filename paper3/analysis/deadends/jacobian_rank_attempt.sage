@@ -1,6 +1,6 @@
 """
-Versuch, rk(J(H_{m,n})) für eine Auswahl Fasern direkt zu bestimmen.
-Sage-Methoden: analytic_rank, rank_bound, etc.
+Attempt to determine rk(J(H_{m,n})) directly for a selection of fibers.
+Sage methods: analytic_rank, rank_bound, etc.
 """
 from sage.all import *
 import sys
@@ -34,11 +34,11 @@ def main():
         J = H.jacobian()
 
         print(f"=== (m,n)=({m},{n}) ===")
-        print(f"  H: y² = {f}")
+        print(f"  H: y^2 = {f}")
         print(f"  Genus: {H.genus()}")
         # Check available methods on J
         methods = [m for m in dir(J) if not m.startswith('_') and 'rank' in m.lower()]
-        print(f"  Methoden mit 'rank': {methods}")
+        print(f"  Methods with 'rank': {methods}")
 
         # Try various rank computations
         for method_name in ['rank', 'analytic_rank', 'rank_bound', 'mwrank']:
@@ -53,7 +53,7 @@ def main():
 
         # Try absolute decomposition via PARI
         try:
-            print(f"  L-Polynom (modulo p, kleiner Test):")
+            print(f"  L-polynomial (modulo p, small test):")
             for p in [3, 5, 7, 11]:
                 try:
                     Hp = HyperellipticCurve(f.change_ring(GF(p)), 0)
