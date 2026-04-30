@@ -92,6 +92,14 @@ sage scripts/paper3/analysis/jh_chabauty_finalize.sage 1000000
 - **Paper 2** (in Vorbereitung): Master-Hit-Datenbank, MW-Konstruktion neuer Bricks, Blocker-Analyse.
 - Paper 3 nutzt `pub_db.py` und das `pub`-Schema aus Paper 2.
 
+## Data releases (off-repo)
+
+Die kompakten Skript-Outputs (`data/proven_fibers.csv`, `data/scan_full_M100.jsonl`) sind in diesem Repository enthalten. Größere Daten — insbesondere der PostgreSQL-Dump des `pub`-Schemas, den auch dieses Paper über Paper 2 mitbenutzt — liegen aus Größengründen extern auf
+
+**<https://renepeschmann.de/research>**
+
+mit demselben `zenodo/`-Layout wie für Paper 2.
+
 ## Memory
 
 Relevant Memory-Einträge (für Sessions):

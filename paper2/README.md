@@ -56,6 +56,26 @@ paper2/
     └── validate_xyz.py               # Internal consistency: x,y,z,g_scale,x_prim,…
 ```
 
+## Data releases (off-repo)
+
+The PostgreSQL dump for the public schema `pub` (with all 1,284,670
+Master-Hit records and the 151,575 fully-factored $f_1$ records) is
+too large for this Git repository and is hosted at
+
+**<https://renepeschmann.de/research>**
+
+The same page also carries:
+- the per-record factorisation outputs of $f_1$ (Stage-3 YAFU logs
+  and certified prime lists);
+- intermediate scan logs from the Mordell-Weil generator;
+- a CSV mirror of `pub.master_hits` for readers who do not want to
+  set up a PostgreSQL instance.
+
+The directory layout mirrors the planned Zenodo deposit accompanying
+the final preprint. Pulling those files is required only for
+*verifying* the database-level claims; the scripts in this directory
+will regenerate everything from scratch given enough compute time.
+
 ## Reproduction workflow
 
 The scripts are designed to run in this order. Each step is idempotent:
