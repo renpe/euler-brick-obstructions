@@ -1,9 +1,9 @@
-# Computational scripts for Paper 4
+# Computational scripts for Paper 2
 
 *Odd-exponent blockers and a Mordell-Weil construction of Euler bricks*,
 R. Peschmann (in preparation).
 
-These scripts produce and verify the database underlying Paper 4. The
+These scripts produce and verify the database underlying Paper 2. The
 public DB schema (`pub`) and the Mordell-Weil generator are the two
 subjects of the paper, and every claim in §3, §5, and §6 is reproducible
 from the scripts in this directory.
@@ -35,7 +35,7 @@ Binary variables default to the unqualified names (`yafu`, `sage`,
 ## Structure
 
 ```
-paper4/
+paper2/
 ├── README.md                         (this file)
 ├── _common/
 │   └── pub_db.py                     # Helpers: insert_master_hit, ensure_mw_group

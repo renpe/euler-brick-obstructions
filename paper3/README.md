@@ -1,11 +1,11 @@
-# Computational scripts for Paper 5
+# Computational scripts for Paper 3
 
 *A torsion-intersection refinement: rigorous proof of the perfect-cuboid conjecture on an explicit family of master-tuple fibers*,
 R. Peschmann (in preparation).
 
 ## Verhältnis zu Paper 1
 
-Paper 5 ist ein **Companion Paper** zu Peschmann (2026), arXiv:2604.09328 (*„Quartic reductions and elliptic obstructions for perfect Euler bricks"*, Paper 1). Paper 1 etabliert die Genus-3-Reduktion `C_A: w² = λ⁸ + Aλ⁴ + 1`, die Klein-4-Involutionen mit drei elliptischen Quotienten `E_A × E_A' × E_A''`, sowie Obstruktionen via Kummer-Charakter und 2-Descent auf `E_A`. Paper 5 baut darauf auf und liefert zwei spezifische neue Beiträge:
+Paper 3 ist ein **Companion Paper** zu Peschmann (2026), arXiv:2604.09328 (*„Quartic reductions and elliptic obstructions for perfect Euler bricks"*, Paper 1). Paper 1 etabliert die Genus-3-Reduktion `C_A: w² = λ⁸ + Aλ⁴ + 1`, die Klein-4-Involutionen mit drei elliptischen Quotienten `E_A × E_A' × E_A''`, sowie Obstruktionen via Kummer-Charakter und 2-Descent auf `E_A`. Paper 3 baut darauf auf und liefert zwei spezifische neue Beiträge:
 
 1. **Reduktionssatz (Theorem 4):** jeder primitive Euler-Brick stammt von einem Master-Tupel ab. Verstärkt Paper 1's Lemma 3.1 (nur Vorwärts-Implikation).
 
@@ -29,7 +29,7 @@ Für (m,n) mit rk(E_3(ℚ))=0 und |E_3(ℚ)_tors|=4: |H_{m,n}(ℚ)|=8 (alle triv
 
 ## Status
 
-- ✅ Theoreme 1, 2, 4: rigoros bewiesen (Paper 5).
+- ✅ Theoreme 1, 2, 4: rigoros bewiesen (Paper 3).
 - ✅ Genus-3 + 3-Quotienten-Zerlegung: zitiert aus Paper 1 (§3, §4).
 - ✅ Hauptsatz auf 117 expliziten Fasern bei M_MAX=50.
 - ⚠️ ~61 Fasern mit |tors|≠4: Verfeinerung möglich.
@@ -40,16 +40,16 @@ Siehe `CONJECTURE_B_ROADMAP.md`.
 
 ## Anforderungen
 
-- Wie Paper 4: PostgreSQL, Python 3.10+, Sage 10.7+, PARI/GP 2.15+
-- `pub_db.py` wird via Symlink aus paper4/_common/ geteilt.
+- Wie Paper 2: PostgreSQL, Python 3.10+, Sage 10.7+, PARI/GP 2.15+
+- `pub_db.py` wird via Symlink aus paper2/_common/ geteilt.
 
-## Struktur (öffentlich, in `scripts/paper5/`)
+## Struktur (öffentlich, in `scripts/paper3/`)
 
 ```
-scripts/paper5/
+scripts/paper3/
 ├── README.md                            (dieses File)
 ├── _common/
-│   └── pub_db.py → ../../paper4/_common/pub_db.py  (symlink)
+│   └── pub_db.py → ../../paper2/_common/pub_db.py  (symlink)
 ├── data/
 │   └── proven_fibers.csv                (117 Fasern als CSV)
 └── analysis/
@@ -66,7 +66,7 @@ Das Manuskript-Material (LaTeX-Quelle, Beweis-Markdowns, kompiliertes PDF) liegt
 ### 117 Fasern rigoros (Hauptsatz)
 
 ```bash
-sage scripts/paper5/analysis/jh_torsion_scale.sage 50
+sage scripts/paper3/analysis/jh_torsion_scale.sage 50
 ```
 
 Output: 518 Fasern geprüft, 117 rigoros bewiesen, 61 unsicher (|tors|≠4).
@@ -74,14 +74,14 @@ Output: 518 Fasern geprüft, 117 rigoros bewiesen, 61 unsicher (|tors|≠4).
 ### Genus-3-Form-Verifikation (Theorem 3 / Recap aus Paper 1)
 
 ```bash
-sage scripts/paper5/analysis/cuboid_genus_check.sage
-sage scripts/paper5/analysis/jh_three_quotients.sage 50
+sage scripts/paper3/analysis/cuboid_genus_check.sage
+sage scripts/paper3/analysis/jh_three_quotients.sage 50
 ```
 
 ### Empirische Höhensuche (B = 10⁶)
 
 ```bash
-sage scripts/paper5/analysis/jh_chabauty_finalize.sage 1000000
+sage scripts/paper3/analysis/jh_chabauty_finalize.sage 1000000
 ```
 
 11 Fasern × 30 Sekunden = ~5 min, alle finden nur die 6 trivialen affinen Punkte.
@@ -89,8 +89,8 @@ sage scripts/paper5/analysis/jh_chabauty_finalize.sage 1000000
 ## Cross-References
 
 - **Paper 1** (arXiv:2604.09328): Genus-3-Setup, Jacobian-Zerlegung, Kummer-Charakter, 2-Descent.
-- **Paper 4** (in Vorbereitung): Master-Hit-Datenbank, MW-Konstruktion neuer Bricks, Blocker-Analyse.
-- Paper 5 nutzt `pub_db.py` und das `pub`-Schema aus Paper 4.
+- **Paper 2** (in Vorbereitung): Master-Hit-Datenbank, MW-Konstruktion neuer Bricks, Blocker-Analyse.
+- Paper 3 nutzt `pub_db.py` und das `pub`-Schema aus Paper 2.
 
 ## Memory
 
@@ -100,4 +100,4 @@ Relevant Memory-Einträge (für Sessions):
 - `cuboid_genus2_zerlegung` — Theorem 3 (zitiert aus Paper 1)
 - `drei_kurven_kollaps` — Hilfslemma
 - `parametrisierung_vollstaendigkeit` — Vorform von Theorem 4
-- `paper5_setup` — Paper-5-Positionierung relativ zu Paper 1 und 4
+- `paper3_setup` — Paper-5-Positionierung relativ zu Paper 1 und 4
