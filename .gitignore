@@ -36,3 +36,13 @@ random_scan_progress.json
 # Local environment overrides
 .env
 .env.local
+
+# Per-worker scan outputs (regenerable from full JSONL or by re-running)
+**/scan_output_M*/
+**/mwrank_pass_M*/
+
+# Intermediate scan files (test runs, mwrank pipeline intermediate)
+**/scan_full_M10.jsonl
+**/scan_output_M10/
+**/scan_full_*_with_mwrank.jsonl
+**/proven_fibers_M*.csv

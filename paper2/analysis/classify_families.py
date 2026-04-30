@@ -4,8 +4,7 @@ Lenhart, Himane T1/T2/T3). Idempotent: only hits without any
 family tag in pub.hit_groups are processed.
 
 Run after every mw_dispatcher.py / mw_rerun.py to assign family tags
-to newly-generated bricks. The migration script pub_migrate.py
-already does an initial pass over all hits.
+to newly-generated bricks.
 
 Usage:
     python3 classify_families.py
@@ -19,7 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "_common"))
 import pub_db
 
 
-# ---------------- Family enumeration (same as pub_migrate.py) -----------------
+# ---------------- Family enumeration -----------------
 
 def is_square(n):
     if n <= 0: return n == 0

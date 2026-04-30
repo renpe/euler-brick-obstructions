@@ -40,8 +40,7 @@ paper4/
 ├── _common/
 │   └── pub_db.py                     # Helpers: insert_master_hit, ensure_mw_group
 ├── migration/
-│   ├── pub_schema.sql                # DDL for the publication schema 'pub'
-│   └── pub_migrate.py                # Migrate public.master_hits → pub.master_hits
+│   └── pub_schema.sql                # DDL for the publication schema 'pub'
 ├── generation/
 │   ├── mw_dispatcher.py              # Subprocess-isolated MW generator
 │   ├── mw_fibre_worker.sage          # Single-fibre worker (JSON output)
@@ -74,18 +73,7 @@ This creates the `pub` schema with six tables (`master_hits`, `fibers`,
 view `pub.hit_taxonomy`. Top-level family and provenance groups are
 inserted statically.
 
-### Phase 2 — Initial migration from the legacy schema
-
-```bash
-.venv-linux/bin/python migration/pub_migrate.py
-```
-
-Copies all Master-Hits from `public.master_hits` into `pub.master_hits`,
-maps `search_bound` to provenance groups, classifies each hit against
-the Saunderson, Lenhart, and Himane families, and creates the 411
-`MW-{m}-{n}` provenance subgroups. Takes about 1 minute on the full DB.
-
-### Phase 3 — Mordell-Weil generation (optional, extends the DB)
+### Phase 2 — Mordell-Weil generation (optional, extends the DB)
 
 ```bash
 .venv-linux/bin/python generation/mw_dispatcher.py 4 4 7
@@ -107,7 +95,7 @@ This runs three phases of `search_new_fibres.sage` (m≤200, m≤500,
 m≤1000) with four parallel workers, then automatically replays
 `mw_rerun.py` on every (m,n) found with `analytic_rank ≥ 2`.
 
-### Phase 4 — Factorisation of $f_1$
+### Phase 3 — Factorisation of $f_1$
 
 ```bash
 nohup .venv-linux/bin/python factorization/pub_factorize.py 6 \
@@ -119,7 +107,7 @@ Six parallel YAFU workers factorise $f_1$ for every hit with
 → YAFU (10 min timeout). Updates `pub.master_hits.num_blockers` and
 populates `pub.f1_factors`.
 
-### Phase 5 — Verification
+### Phase 4 — Verification
 
 ```bash
 .venv-linux/bin/python analysis/theorem_check.py
