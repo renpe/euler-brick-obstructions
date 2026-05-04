@@ -8,9 +8,9 @@ one paper.
 
 | Subdirectory | Paper |
 |--------------|-------|
-| [`paper1/`](paper1/) | *Quartic reductions and elliptic obstructions for perfect Euler bricks*, arXiv:2604.09328 (2026) |
-| [`paper2/`](paper2/) | *An odd-exponent blocker theorem and a Mordell-Weil construction of body cuboids* (in preparation) |
-| [`paper3/`](paper3/) | *A torsion-intersection refinement: rigorous proof of the perfect-cuboid conjecture on an explicit family of master-tuple fibers* (in preparation) |
+| [`paper1/`](paper1/) | *Quartic reductions and elliptic obstructions for perfect Euler bricks*, [arXiv:2604.09328](https://arxiv.org/abs/2604.09328) (April 2026) |
+| [`paper2/`](paper2/) | *Exponent-one blockers and a Mordell-Weil construction of Euler bricks*, [arXiv:2605.00573](https://arxiv.org/abs/2605.00573) (April 2026) |
+| [`paper3/`](paper3/) | *A torsion-intersection proof of perfect-cuboid nonexistence on 1,072 explicit master-tuple fibers*, [arXiv:2604.28072](https://arxiv.org/abs/2604.28072) (April 2026) |
 
 Each subdirectory contains its own `README.md` describing the scripts
 and their paper references.

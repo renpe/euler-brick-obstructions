@@ -1,7 +1,7 @@
 # Computational scripts for Paper 3
 
-*A torsion-intersection refinement: rigorous proof of the perfect-cuboid conjecture on an explicit family of master-tuple fibers*,
-R. Peschmann (in preparation).
+*A torsion-intersection proof of perfect-cuboid nonexistence on 1,072 explicit master-tuple fibers*,
+R. Peschmann, [arXiv:2604.28072](https://arxiv.org/abs/2604.28072) (April 2026).
 
 ## Relation to Paper 1
 
@@ -112,7 +112,7 @@ affine points.
 
 - **Paper 1** (arXiv:2604.09328): genus-3 setup, Jacobian
   decomposition, Kummer character, 2-descent.
-- **Paper 2** (in preparation): Master-Hit database, MW construction
+- **Paper 2** (arXiv:2605.00573): Master-Hit database, MW construction
   of new bricks, blocker analysis.
 - Paper 3 uses `pub_db.py` and the `pub` schema from Paper 2.
 

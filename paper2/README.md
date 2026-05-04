@@ -1,7 +1,7 @@
 # Computational scripts for Paper 2
 
-*Odd-exponent blockers and a Mordell-Weil construction of Euler bricks*,
-R. Peschmann (in preparation).
+*Exponent-one blockers and a Mordell-Weil construction of Euler bricks*,
+R. Peschmann, [arXiv:2605.00573](https://arxiv.org/abs/2605.00573) (April 2026).
 
 These scripts produce and verify the database underlying Paper 2. The
 public DB schema (`pub`) and the Mordell-Weil generator are the two

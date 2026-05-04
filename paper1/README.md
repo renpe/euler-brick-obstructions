@@ -1,7 +1,7 @@
 # Computational scripts for Paper 1
 
 *Quartic reductions and elliptic obstructions for perfect Euler bricks*,
-R. Peschmann, arXiv:2604.09328 (2026).
+R. Peschmann, [arXiv:2604.09328](https://arxiv.org/abs/2604.09328) (April 2026).
 
 ## Requirements
 
